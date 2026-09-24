@@ -463,6 +463,8 @@ enum : uint32_t {
     RES_TYPE_BGTASK_ADJUST_EVENT = 223,
     //report nfc signal
     RES_TYPE_REPORT_NFC_SIGNAL = 224,
+    // dialog show event
+    RES_TYPE_DIALOG_EVENT = 225,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType
