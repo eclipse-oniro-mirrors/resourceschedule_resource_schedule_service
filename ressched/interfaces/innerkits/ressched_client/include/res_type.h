@@ -464,7 +464,7 @@ enum : uint32_t {
     //report nfc signal
     RES_TYPE_REPORT_NFC_SIGNAL = 224,
     // dialog show event
-    RES_TYPE_DIALOG_EVENT = 225,
+    RES_TYPE_DIALOG_SHOW_EVENT = 225,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType

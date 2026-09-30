@@ -128,7 +128,7 @@ namespace {
         ResType::RES_TYPE_SNAPSHOT_FAILURE,
         ResType::SYNC_RES_TYPE_GET_UI_NODE_GC_CONFIG,
         ResType::RES_TYPE_COMPONENT_STATE_CHANGE,
-        ResType::RES_TYPE_DIALOG_EVENT
+        ResType::RES_TYPE_DIALOG_SHOW_EVENT
     };
     static const std::unordered_set<uint32_t> FG_THIRDPART_RES = {
         ResType::RES_TYPE_CLICK_RECOGNIZE,
