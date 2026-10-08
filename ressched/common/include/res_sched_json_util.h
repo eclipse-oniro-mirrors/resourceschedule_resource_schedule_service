@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,17 @@ bool ParseStringParameterFromJson(const std::string& name, std::string &value, c
  *
  */
 bool ParseBoolParameterFromJson(const std::string& name, bool& value, const nlohmann::json& jsonObj);
+
+/**
+ * @brief Parse a float value with key name from the json object.
+ *
+ * @param name the key of the the target item
+ * @param value the value of the target item
+ * @param jsonObj the target object
+ * @return 'true' if parse success
+ *
+ */
+bool ParseFloatParameterFromJson(const std::string& name, float& value, const nlohmann::json& jsonObj);
 
 /**
  * @brief Parse a int value with key name from the json string object.

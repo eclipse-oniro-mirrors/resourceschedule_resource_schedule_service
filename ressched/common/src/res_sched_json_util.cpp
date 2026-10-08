@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,20 @@ bool ParseBoolParameterFromJson(const std::string& name, bool& value, const nloh
     if (!jsonObj.is_null() && !name.empty() && jsonObj.contains(name) && jsonObj.at(name).is_boolean()) {
         value = jsonObj[name].get<bool>();
         return true;
+    }
+    return false;
+}
+
+bool ParseFloatParameterFromJson(const std::string& name, float& value, const nlohmann::json& jsonObj)
+{
+    if (!jsonObj.is_null() && !name.empty() && jsonObj.contains(name)) {
+        if (jsonObj.at(name).is_string() && StrToFloat(jsonObj[name].get<std::string>(), value)) {
+            return true;
+        }
+        if (jsonObj.at(name).is_number()) {
+            value = jsonObj[name].get<float>();
+            return true;
+        }
     }
     return false;
 }

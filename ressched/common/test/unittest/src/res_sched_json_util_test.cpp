@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ namespace {
     const std::string TEST_INT_KEY = "intKey";
     const std::string TEST_STRING_KEY = "stringKey";
     const std::string TEST_BOOL_KEY = "boolKey";
+    const std::string TEST_FLOAT_KEY = "floatKey";
     const std::string TEST_ARRAY_KEY = "arrayKey";
     const std::string TEST_OBJ_KEY = "objKey";
     const std::string TEST_KEY = "testKey";
@@ -120,6 +121,44 @@ HWTEST_F(ResSchedJsonUtilTest, ParseBoolParameterFromJson_001, Function | Medium
     testObj[TEST_BOOL_KEY] = true;
     EXPECT_TRUE(ResCommonUtil::ParseBoolParameterFromJson(TEST_BOOL_KEY, value, testObj));
     EXPECT_TRUE(value);
+}
+
+/**
+ * @tc.name: ResSchedJsonUtilTest ParseFloatParameterFromJson_001
+ * @tc.desc: test ParseFloatParameterFromJson
+ * @tc.type: FUNC
+ * @tc.require: issueIB8Y0E
+ */
+HWTEST_F(ResSchedJsonUtilTest, ParseFloatParameterFromJson_001, Function | MediumTest | Level0)
+{
+    nlohmann::json testObj;
+    float value = -1.0f;
+    // json is null, key not exist
+    EXPECT_FALSE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, -1.0f);
+    // empty name
+    testObj[TEST_KEY] = "test";
+    EXPECT_FALSE(ResCommonUtil::ParseFloatParameterFromJson("", value, testObj));
+    EXPECT_EQ(value, -1.0f);
+    // key not found
+    EXPECT_FALSE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, -1.0f);
+    // value is non-numberic string
+    testObj[TEST_FLOAT_KEY] = "abc";
+    EXPECT_FALSE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, -1.0f);
+    // value is numberic string
+    testObj[TEST_FLOAT_KEY] = "3.14";
+    EXPECT_TRUE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, 3.14f);
+    // value is json float number
+    testObj[TEST_FLOAT_KEY] = 2.71;
+    EXPECT_TRUE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, 2.71f);
+    // value is json int number
+    testObj[TEST_FLOAT_KEY] = 100;
+    EXPECT_TRUE(ResCommonUtil::ParseFloatParameterFromJson(TEST_FLOAT_KEY, value, testObj));
+    EXPECT_EQ(value, 100.00f);
 }
 
 /**
