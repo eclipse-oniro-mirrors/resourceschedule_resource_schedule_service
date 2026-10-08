@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,7 @@ int32_t ResSchedExeMgr::KillProcess(pid_t pid)
 
 void ResSchedExeMgr::InitPluginMgrPretreatment(const nlohmann::json& payload)
 {
+    std::lock_guard<std::mutex> lock(initMutex_);
     if (isInit) {
         RSSEXE_LOGE("plugin manager has init");
         return;
@@ -249,7 +250,7 @@ void ResSchedExeMgr::GetCgroupFileContent(uint32_t resType, const nlohmann::json
     std::string path = std::string("/proc/").append(std::to_string(pid)).append("/cgroup");
     char resolvedPath[PATH_MAX] = { 0 };
     if (path.size() > PATH_MAX || !realpath(path.c_str(), resolvedPath)) {
-        RSSEXE_LOGE("%{public}s realpath failed, pid = %{public}d.", __func__, pid);
+        RSSEXE_LOGD("%{public}s realpath failed, pid = %{public}d.", __func__, pid);
         return;
     }
     auto realPath = std::string(resolvedPath);
