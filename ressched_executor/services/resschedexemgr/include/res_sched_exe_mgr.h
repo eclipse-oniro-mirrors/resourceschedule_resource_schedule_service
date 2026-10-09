@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define RESSCHED_EXECUTOR_SERVICES_RESSCHEDEXEMGR_INCLUDE_RES_SCHED_EXE_MGR_H
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <sys/types.h>
 
@@ -75,6 +76,7 @@ private:
     bool ParseValue(int32_t& value, const char* name, const nlohmann::json& payload);
     void InitPluginMgrPretreatment(const nlohmann::json& payload);
 
+    std::mutex initMutex_;
     bool isInit = false;
     int ipcNumber_ = 0;
     std::map<int, std::string> ipcMessage_ = {};
