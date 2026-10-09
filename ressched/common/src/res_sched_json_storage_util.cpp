@@ -19,6 +19,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
+#include <stdio.h>
 #include <sys/stat.h>
 
 #include "errors.h"
@@ -148,7 +149,8 @@ bool ResSchedJsonStorage::CreateNodeFile(const std::string &filePath)
         RESSCHED_LOGE("Fail to open file:%{private}s", realPath.c_str());
         return false;
     }
-    close(fd);
+    fdsan_exchange_owner_tag(fd, 0, LOG_DOMAIN);
+    fdsan_close_with_tag(fd, LOG_DOMAIN);
     return true;
 }
 
