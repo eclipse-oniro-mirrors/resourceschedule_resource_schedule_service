@@ -19,7 +19,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/stat.h>
 
 #include "errors.h"
