@@ -23,6 +23,8 @@ group("etc") {
 ohos_prebuilt_etc("resource_schedule_service.cfg") {
   if (resource_schedule_service_has_sys_nice_enable) {
     source = "resource_schedule_service_has_nice.cfg"
+  } else if (resource_schedule_service_auto_enable) {
+    source = "resource_schedule_service_auto.cfg"
   } else {
     source = "resource_schedule_service.cfg"
   }
