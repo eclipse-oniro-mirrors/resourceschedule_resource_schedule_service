@@ -44,7 +44,10 @@ ohos_shared_library("ressched_common_utils") {
     "../common/src/res_sched_json_storage_util.cpp",
   ]
 
-  cflags_cc = [ "-fstack-protector-strong" ]
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-Os",
+  ]
   deps = []
 
   external_deps = [

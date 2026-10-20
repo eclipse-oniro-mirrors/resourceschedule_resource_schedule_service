@@ -40,6 +40,9 @@ taihe_shared_library("systemload_taihe_native") {
     debug = false
   }
 
+  cflags_c = [ "-Os" ]
+  cflags_cc = [ "-Os" ]
+
   taihe_generated_file_path = "$taihe_generated_file_path"
   subsystem_name = "$subsystem_name"
   part_name = "$part_name"
