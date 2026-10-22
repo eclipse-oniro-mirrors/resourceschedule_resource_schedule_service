@@ -1355,7 +1355,7 @@ void CgroupEventHandler::HandleReportWebSubWinTaskStatus(uint32_t resType, int64
 
     auto handler = SchedController::GetInstance().GetCgroupEventHandler();
     if (handler) {
-        static const std::string taskName = "webSubWinTask" + std::to_string(pid) + std::to_string(uid);
+        std::string taskName = "webSubWinTask" + std::to_string(pid) + std::to_string(uid);
         handler->RemoveTask(taskName);
         if (procRecord->webSubWinTaskState_) {
             handler->PostTask(
