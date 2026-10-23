@@ -22,6 +22,8 @@ group("unittest") {
     ":resschedhitracechain_test",
     ":resschedjsonstorageutil_test",
     ":resschedjsonutil_test",
+    ":resschedlrucache_test",
+    ":resschedsignaturevalidator_test",
     ":resschedstringutil_test",
     ":resschedsystemutil_test",
     ":resschedtimeutil_test",
@@ -211,7 +213,7 @@ ohos_unittest("resschedtimeutil_test") {
   branch_protector_ret = "pac_ret"
 }
 
-ohos_unittest("lrucache_test") {
+ohos_unittest("resschedlrucache_test") {
   module_out_path = module_output_path
   cflags = [
     "-Dprivate=public",
