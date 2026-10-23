@@ -466,7 +466,7 @@ enum : uint32_t {
     // dialog show event
     RES_TYPE_DIALOG_SHOW_EVENT = 225,
     // report lv into app inim task
-    RES_TYPE_LV_INTO_INIM = 226;
+    RES_TYPE_LV_INTO_INIM = 226,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType
