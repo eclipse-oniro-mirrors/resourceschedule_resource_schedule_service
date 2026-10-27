@@ -31,6 +31,7 @@ ohos_shared_library("device_standby_plugin") {
   }
   cflags_cc = [
     "-fstack-protector-strong",
+    "-Os"
   ]
 
   configs = [ ":device_standby_plugin_config" ]
