@@ -15,7 +15,7 @@
 
 #include "background_sensitive_task_overlapping_scene_recognizer.h"
 #include "continuous_app_install_recognizer.h"
-#include "slide_recognizer.h"
+#include "slide_recognizer_proxy.h"
 #include "res_sched_log.h"
 #include "scene_recognizer_mgr.h"
 #include "system_upgrade_scene_recognizer.h"
@@ -31,7 +31,7 @@ SceneRecognizerMgr::SceneRecognizerMgr()
         { RecognizeType::SYSTEM_UPGRADE_SCENE_RECOGNIZER, std::make_shared<SystemUpgradeSceneRecognizer>() },
         { RecognizeType::BACKGROUND_SENSITIVE_TASK_OVERLAPPING_SCENE_RECOGNIZER,
             std::make_shared<BackgroundSensitiveTaskOverlappingSceneRecognizer>() },
-        { RecognizeType::SLIDE_RECOGNIZER, std::make_shared<SlideRecognizer>()},
+        { RecognizeType::SLIDE_RECOGNIZER, std::make_shared<SlideRecognizerProxy>()},
         };
     ffrtQueue_ = std::make_shared<ffrt::queue>("scene_recognizers_queue",
         ffrt::queue_attr().qos(ffrt::qos_user_interactive));
@@ -55,6 +55,8 @@ void SceneRecognizerMgr::DispatchResource(const std::shared_ptr<ResData>& resDat
         RESSCHED_LOGE("%{public}s, failed, null res data.", __func__);
         return;
     }
+    RESSCHED_LOGI("slide reco multiprocessing DispatchResource resType=%{public}u value=%{public}lld",
+        resData->resType, (long long)resData->value);
     for (const auto& recognizerItem : sceneRecognizers_) {
         const auto& recognizer = recognizerItem.second;
         if (!recognizer->Accept(resData->resType)) {
@@ -75,18 +77,18 @@ void SceneRecognizerMgr::SubmitTask(const std::function<void()>& task)
 
 void SceneRecognizerMgr::SetListFlingTimeoutTime(int64_t value)
 {
-    std::static_pointer_cast<SlideRecognizer>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
+    std::static_pointer_cast<SlideRecognizerProxy>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
         SetListFlingTimeoutTime(value);
 }
 
 void SceneRecognizerMgr::SetListFlingEndTime(int64_t value)
 {
-    std::static_pointer_cast<SlideRecognizer>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
+    std::static_pointer_cast<SlideRecognizerProxy>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
         SetListFlingEndTime(value);
 }
 void SceneRecognizerMgr::SetListFlingSpeedLimit(float value)
 {
-    std::static_pointer_cast<SlideRecognizer>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
+    std::static_pointer_cast<SlideRecognizerProxy>(sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER])->
         SetListFlingSpeedLimit(value);
 }
 

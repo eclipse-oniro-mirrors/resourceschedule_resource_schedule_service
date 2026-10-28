@@ -16,30 +16,22 @@
 #ifndef RESSCHED_SCENE_RECOGNIZE_SLIDE_RECOGNIZER_H
 #define RESSCHED_SCENE_RECOGNIZE_SLIDE_RECOGNIZER_H
 
-#include "scene_recognizer_base.h"
+#include "slide_recognizer_proxy.h"
 #include "ffrt.h"
+#include <cstdint>
+#include <memory>
 
 namespace OHOS {
 namespace ResourceSchedule {
-namespace SlideRecognizeStat {
-enum : uint32_t {
-    IDLE,
-    SLIDE_NORMAL_DETECTING,
-    SLIDE_NORMAL,
-    LIST_FLING,
-};
-}
-static constexpr int64_t DEFAULT_LIST_FLINT_TIME_OUT_TIME = 3 * 1000 * 1000;
-static constexpr int64_t DEFAULT_LIST_FLINT_END_TIME = 150 * 1000;
-static constexpr float DEFAULT_LIST_FLING_SPEED_LIMIT = 3.0;
-class SlideRecognizer : public SceneRecognizerBase {
+class SlideRecognizer : public SlideRecognizerProxy,
+    public std::enable_shared_from_this<SlideRecognizer> {
 public:
     SlideRecognizer();
     ~SlideRecognizer();
     void OnDispatchResource(uint32_t, int64_t value, const nlohmann::json& payload) override;
-    void SetListFlingTimeoutTime(int64_t value);
-    void SetListFlingEndTime(int64_t value);
-    void SetListFlingSpeedLimit(float value);
+    bool IsTaskClean() const;
+    uint32_t GetSlideStatus();
+    void ReportListFlingLockedEnd(const nlohmann::json& payload);
 private:
     void HandleSlideEvent(int64_t value, const nlohmann::json& payload);
     void HandleSendFrameEvent(const nlohmann::json& payload);
@@ -50,17 +42,17 @@ private:
     void StartDetecting(const nlohmann::json& payload);
     nlohmann::json FillRealPidAndUid(const nlohmann::json& payload);
     void ListFlingEnd(const nlohmann::json& payload);
-    uint32_t GetSlideStatus();
+    nlohmann::json BuildExtInfoWithScreenId(const nlohmann::json& payload);
+    uint32_t slideState_ = SlideRecognizeStat::IDLE;
+    ffrt::recursive_mutex stateMutex_;
     ffrt::task_handle listFlingEndTask_ = nullptr;
     ffrt::task_handle listFlingTimeOutTask_ = nullptr;
     int64_t slideDetectingTime_ = -1;
-    int64_t listFlingTimeOutTime_ = DEFAULT_LIST_FLINT_TIME_OUT_TIME;
-    int64_t listFlingEndTime_ = DEFAULT_LIST_FLINT_END_TIME;
-    float listFlingSpeedLimit_ = DEFAULT_LIST_FLING_SPEED_LIMIT;
     bool isInTouching_ = false;
     std::string slidePid_ = "";
     std::string slideUid_ = "";
     std::string scrTid_ = "";
+    uint64_t lastScreenId_ = 0;
 };
 } // namespace ResourceSchedule
 } // namespace OHOS
