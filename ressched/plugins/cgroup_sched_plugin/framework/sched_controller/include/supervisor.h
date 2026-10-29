@@ -202,6 +202,7 @@ public:
 
     std::shared_ptr<ProcessRecord> focusedProcess_ = nullptr;
     bool isCosmicCubeStateHide_ = false;
+    bool delayTaskPerf_ = false;
     int32_t liveViewState_ = -1;
     int32_t cpuLevel_ = CpuLevelType::DEFAULT;
 
