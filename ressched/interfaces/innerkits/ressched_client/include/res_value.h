@@ -201,6 +201,7 @@ enum ContinuousTaskStatus : int64_t {
 */
 enum BgtaskInnerEvent : int64_t {
     MULTI_DEVICE_CAST_EVENT = 0,
+    AUDIO_USB_DEVICE_CAST_EVENT = 1,
 };
 
 /**
