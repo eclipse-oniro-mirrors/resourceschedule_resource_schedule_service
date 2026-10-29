@@ -399,17 +399,21 @@ HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SubmitTask_002, Function | Mediu
  */
 HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SetSlideConfig_001, Function | MediumTest | Level0)
 {
-    SceneRecognizerMgr localMgr;
-    auto slideRecognizer = std::static_pointer_cast<SlideRecognizer>(
-        localMgr.sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
-    ASSERT_NE(slideRecognizer, nullptr);
+    auto& mgr = SceneRecognizerMgr::GetInstance();
+    auto slideProxy = std::static_pointer_cast<SlideRecognizerProxy>(
+        mgr.sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
+    ASSERT_NE(slideProxy, nullptr);
 
-    localMgr.SetListFlingTimeoutTime(111);
-    localMgr.SetListFlingEndTime(222);
-    localMgr.SetListFlingSpeedLimit(9.0);
-    EXPECT_EQ(slideRecognizer->listFlingTimeOutTime_, 111);
-    EXPECT_EQ(slideRecognizer->listFlingEndTime_, 222);
-    EXPECT_FLOAT_EQ(slideRecognizer->listFlingSpeedLimit_, 9.0);
+    mgr.SetListFlingTimeoutTime(111);
+    mgr.SetListFlingEndTime(222);
+    mgr.SetListFlingSpeedLimit(9.0);
+    EXPECT_EQ(slideProxy->listFlingTimeOutTime_, 111);
+    EXPECT_EQ(slideProxy->listFlingEndTime_, 222);
+    EXPECT_FLOAT_EQ(slideProxy->listFlingSpeedLimit_, 9.0);
+
+    mgr.SetListFlingTimeoutTime(DEFAULT_LIST_FLING_TIME_OUT_TIME);
+    mgr.SetListFlingEndTime(DEFAULT_LIST_FLING_END_TIME);
+    mgr.SetListFlingSpeedLimit(DEFAULT_LIST_FLING_SPEED_LIMIT);
 }
 
 /**
@@ -421,19 +425,19 @@ HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SetSlideConfig_001, Function | M
  */
 HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_CApiSetSlideConfig_001, Function | MediumTest | Level0)
 {
-    auto slideRecognizer = std::static_pointer_cast<SlideRecognizer>(
+    auto slideProxy = std::static_pointer_cast<SlideRecognizerProxy>(
         SceneRecognizerMgr::GetInstance().sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
-    ASSERT_NE(slideRecognizer, nullptr);
+    ASSERT_NE(slideProxy, nullptr);
 
     SetListFlingTimeoutTime(123);
     SetListFlingEndTime(234);
     SetListFlingSpeedLimit(8.0);
-    EXPECT_EQ(slideRecognizer->listFlingTimeOutTime_, 123);
-    EXPECT_EQ(slideRecognizer->listFlingEndTime_, 234);
-    EXPECT_FLOAT_EQ(slideRecognizer->listFlingSpeedLimit_, 8.0);
+    EXPECT_EQ(slideProxy->listFlingTimeOutTime_, 123);
+    EXPECT_EQ(slideProxy->listFlingEndTime_, 234);
+    EXPECT_FLOAT_EQ(slideProxy->listFlingSpeedLimit_, 8.0);
 
-    SetListFlingTimeoutTime(DEFAULT_LIST_FLINT_TIME_OUT_TIME);
-    SetListFlingEndTime(DEFAULT_LIST_FLINT_END_TIME);
+    SetListFlingTimeoutTime(DEFAULT_LIST_FLING_TIME_OUT_TIME);
+    SetListFlingEndTime(DEFAULT_LIST_FLING_END_TIME);
     SetListFlingSpeedLimit(DEFAULT_LIST_FLING_SPEED_LIMIT);
 }
 

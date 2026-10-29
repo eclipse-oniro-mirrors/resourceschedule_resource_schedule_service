@@ -20,6 +20,7 @@
 #include "res_sched_mgr.h"
 #include "scene_recognizer_mgr.h"
 #include "slide_recognizer.h"
+#include "slide_recognizer_proxy.h"
 
 namespace OHOS {
 namespace ResourceSchedule {
@@ -37,8 +38,9 @@ std::shared_ptr<SlideRecognizer> SlideRecognizeTest::slideRecognizer_ = nullptr;
 
 void SlideRecognizeTest::SetUpTestCase(void)
 {
-    slideRecognizer_ = std::static_pointer_cast<SlideRecognizer>(SceneRecognizerMgr::GetInstance().
-        sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
+    auto slideProxy = std::static_pointer_cast<SlideRecognizerProxy>(
+        SceneRecognizerMgr::GetInstance().sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
+    slideRecognizer_ = slideProxy->GetOrCreateInstance(0);
 }
 
 void SlideRecognizeTest::TearDownTestCase() {}

@@ -15,6 +15,7 @@
 #include "slide_recognizer_proxy.h"
 #include "slide_recognizer.h"
 #include "display_manager.h"
+#include "hitrace_meter.h"
 #include "res_common_util.h"
 #include "res_sched_log.h"
 #include "res_type.h"
@@ -23,6 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_set>
 
 namespace OHOS {
@@ -37,7 +39,7 @@ static const std::unordered_set<uint32_t> SLIDE_PROXY_ACCEPT_TYPES = {
 
 static const char* PAYLOAD_KEY_SCREEN_ID = "screenId";
 static const char* PAYLOAD_KEY_DISPLAY_ID = "displayId";
-
+static constexpr uint64_t MAIN_SCREEN_ID = 0;
 
 SlideRecognizerProxy::SlideRecognizerProxy()
 {
@@ -82,66 +84,53 @@ uint64_t SlideRecognizerProxy::ConvertDisplayIdToRsScreenId(uint64_t displayId)
 {
     auto it = displayIdToRsScreenId_.find(displayId);
     if (it != displayIdToRsScreenId_.end()) {
-        RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy ConvertDisplayIdToRsScreenId cache hit"
-            " displayId = %{public}llu rsScreenId=%{public}llu", (unsigned long long)displayId,
-            (unsigned long long)it->second);
         return it->second;
     }
     OHOS::Rosen::ScreenId rsScreenId = 0;
     bool ret = OHOS::Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(
         static_cast<OHOS::Rosen::ScreenId>(displayId), rsScreenId);
     if (!ret) {
-        RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy ConvertDisplayIdToRsScreenId convert failed"
-            " displayId = %{public}llu", (unsigned long long)displayId);
-        return displayId;
+        return MAIN_SCREEN_ID;
     }
     displayIdToRsScreenId_[displayId] = static_cast<uint64_t>(rsScreenId);
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy ConvertDisplayIdToRsScreenId convert success"
-        " displayId = %{public}llu rsScreenId=%{public}llu", (unsigned long long)displayId,
-        (unsigned long long)rsScreenId);
     return static_cast<uint64_t>(rsScreenId);
 }
 
 void SlideRecognizerProxy::OnDispatchResource(uint32_t resType, int64_t value, const nlohmann::json& payload)
 {
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource"
-        " resType=%{public}u value=%{public}lld payload = %{public}s ",
-        resType, (long long)value, payload.dump().c_str());
-    uint64_t screenId = 0;
-    auto screenIdOpt = ExtractScreenIdFromPayload(payload);
-    if (screenIdOpt.has_value()) {
-        screenId = screenIdOpt.value();
-        RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource"
-            " screenId = %{public}llu ", (unsigned long long)screenId);
-    } else {
-        auto displayIdOpt = ExtractDisplayIdFromPayload(payload);
-        if (displayIdOpt.has_value()) {
-            uint64_t displayId = displayIdOpt.value();
-            if (resType == ResType::RES_TYPE_CLICK_RECOGNIZE &&
-                value == ResType::ClickEventType::TOUCH_EVENT_DOWN) {
-                screenId = ConvertDisplayIdToRsScreenId(displayId);
-                RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource else if"
-                    " screenId = %{public}llu ", (unsigned long long)screenId);
-            } else {
-                auto it = displayIdToRsScreenId_.find(displayId);
-                screenId = (it != displayIdToRsScreenId_.end()) ? it->second : displayId;
-                RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource else else"
-                    " screenId = %{public}llu ", (unsigned long long)screenId);
+    std::string trace_str("SlideRecognizerProxy:OnDispatchResource resType:");
+    trace_str.append(std::to_string(resType));
+    trace_str.append(" value:");
+    trace_str.append(std::to_string(value));
+    StartTrace(HITRACE_TAG_APP, trace_str, -1);
+    uint64_t screenId = MAIN_SCREEN_ID;
+    if (resType != ResType::RES_TYPE_AXIS_EVENT) {
+        auto screenIdOpt = ExtractScreenIdFromPayload(payload);
+        if (screenIdOpt.has_value()) {
+            screenId = screenIdOpt.value();
+        } else {
+            auto displayIdOpt = ExtractDisplayIdFromPayload(payload);
+            if (displayIdOpt.has_value()) {
+                uint64_t displayId = displayIdOpt.value();
+                if (resType == ResType::RES_TYPE_CLICK_RECOGNIZE &&
+                    value == ResType::ClickEventType::TOUCH_EVENT_DOWN) {
+                    screenId = ConvertDisplayIdToRsScreenId(displayId);
+                } else {
+                    auto it = displayIdToRsScreenId_.find(displayId);
+                    screenId = (it != displayIdToRsScreenId_.end()) ? it->second : MAIN_SCREEN_ID;
+                }
             }
         }
     }
-
     auto recognizer = GetOrCreateInstance(screenId);
-    if (recognizer == nullptr) {
-        RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource GetOrCreateInstance failed"
-            " screenId = %{public}llu ", (unsigned long long)screenId);
-        return;
-    }
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy OnDispatchResource dispatch to"
-        " screenId = %{public}llu ", (unsigned long long)screenId);
+    std::string screen_id_trace_str("GetOrCreateInstance screenId:");
+    screen_id_trace_str.append(std::to_string(screenId));
+    StartTrace(HITRACE_TAG_APP, screen_id_trace_str, -1);
+    FinishTrace(HITRACE_TAG_APP);
     nlohmann::json payloadWithScreenId = payload;
     payloadWithScreenId["screenId"] = std::to_string(screenId);
     recognizer->OnDispatchResource(resType, value, payloadWithScreenId);
+    FinishTrace(HITRACE_TAG_APP);
 }
 
 std::shared_ptr<SlideRecognizer> SlideRecognizerProxy::GetOrCreateInstance(uint64_t screenId)
@@ -149,20 +138,13 @@ std::shared_ptr<SlideRecognizer> SlideRecognizerProxy::GetOrCreateInstance(uint6
     std::lock_guard<std::mutex> lock(instancesMutex_);
     auto it = instances_.find(screenId);
     if (it != instances_.end()) {
-        RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy GetOrCreateInstance found existing "
-            " screenId = %{public}llu ", (unsigned long long)screenId);
         return it->second;
     }
     auto recognizer = std::make_shared<SlideRecognizer>();
-    if (recognizer == nullptr) {
-        return nullptr;
-    }
     recognizer->listFlingTimeOutTime_ = listFlingTimeOutTime_;
     recognizer->listFlingEndTime_ = listFlingEndTime_;
     recognizer->listFlingSpeedLimit_ = listFlingSpeedLimit_;
     instances_[screenId] = recognizer;
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy GetOrCreateInstance created "
-        " screenId = %{public}llu total =%{public}zu", (unsigned long long)screenId, instances_.size());
     if (instances_.size() > MAX_INSTANCE_COUNT) {
         CleanupIdleInstances();
     }
@@ -171,14 +153,10 @@ std::shared_ptr<SlideRecognizer> SlideRecognizerProxy::GetOrCreateInstance(uint6
 
 void SlideRecognizerProxy::CleanupIdleInstances()
 {
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy CleanupIdleInstances cleanup total =%{public}zu",
-        instances_.size());
     for (auto it = instances_.begin(); it != instances_.end();) {
         if (it->second && it->second->GetSlideStatus() == SlideRecognizeStat::IDLE &&
             it->second->IsTaskClean()) {
-                RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy CleanupIdleInstances"
-                    " screenId = %{public}llu", (unsigned long long)it->first);
-                it = instances_.erase(it);
+            it = instances_.erase(it);
         } else {
             ++it;
         }
@@ -187,8 +165,6 @@ void SlideRecognizerProxy::CleanupIdleInstances()
 
 void SlideRecognizerProxy::SetListFlingTimeoutTime(int64_t value)
 {
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy SetListFlingTimeoutTime value =%{public}lld",
-        (long long)value);
     listFlingTimeOutTime_ = value;
     std::lock_guard<std::mutex> lock(instancesMutex_);
     for (auto& [screenId, recognizer] : instances_) {
@@ -198,8 +174,6 @@ void SlideRecognizerProxy::SetListFlingTimeoutTime(int64_t value)
 
 void SlideRecognizerProxy::SetListFlingEndTime(int64_t value)
 {
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy SetListFlingEndTime value =%{public}lld",
-        (long long)value);
     listFlingEndTime_ = value;
     std::lock_guard<std::mutex> lock(instancesMutex_);
     for (auto& [screenId, recognizer] : instances_) {
@@ -209,7 +183,6 @@ void SlideRecognizerProxy::SetListFlingEndTime(int64_t value)
 
 void SlideRecognizerProxy::SetListFlingSpeedLimit(float value)
 {
-    RESSCHED_LOGI("slide reco multiprocessing SlideRecognizerProxy SetListFlingSpeedLimit value =%{public}f", value);
     listFlingSpeedLimit_ = value;
     std::lock_guard<std::mutex> lock(instancesMutex_);
     for (auto& [screenId, recognizer] : instances_) {

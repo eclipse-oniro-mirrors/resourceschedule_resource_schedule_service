@@ -55,8 +55,6 @@ void SceneRecognizerMgr::DispatchResource(const std::shared_ptr<ResData>& resDat
         RESSCHED_LOGE("%{public}s, failed, null res data.", __func__);
         return;
     }
-    RESSCHED_LOGI("slide reco multiprocessing DispatchResource resType=%{public}u value=%{public}lld",
-        resData->resType, (long long)resData->value);
     for (const auto& recognizerItem : sceneRecognizers_) {
         const auto& recognizer = recognizerItem.second;
         if (!recognizer->Accept(resData->resType)) {
