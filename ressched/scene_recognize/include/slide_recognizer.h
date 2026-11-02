@@ -38,7 +38,7 @@ private:
     void HandleClickEvent(int64_t value, const nlohmann::json& payload);
     void HandleSlideDetecting(const nlohmann::json& payload);
     void HandleListFlingStart(const nlohmann::json& payload);
-    void HandleSlideOFFEvent();
+    void HandleSlideOFFEvent(const nlohmann::json& payload);
     void StartDetecting(const nlohmann::json& payload);
     nlohmann::json FillRealPidAndUid(const nlohmann::json& payload);
     void ListFlingEnd(const nlohmann::json& payload);
@@ -52,7 +52,6 @@ private:
     std::string slidePid_ = "";
     std::string slideUid_ = "";
     std::string scrTid_ = "";
-    uint64_t lastScreenId_ = 0;
 };
 } // namespace ResourceSchedule
 } // namespace OHOS

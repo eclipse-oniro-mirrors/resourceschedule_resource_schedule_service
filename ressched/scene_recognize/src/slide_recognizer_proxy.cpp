@@ -39,7 +39,6 @@ static const std::unordered_set<uint32_t> SLIDE_PROXY_ACCEPT_TYPES = {
 
 static const char* PAYLOAD_KEY_SCREEN_ID = "screenId";
 static const char* PAYLOAD_KEY_DISPLAY_ID = "displayId";
-static constexpr uint64_t MAIN_SCREEN_ID = 0;
 
 SlideRecognizerProxy::SlideRecognizerProxy()
 {
@@ -82,9 +81,12 @@ std::optional<uint64_t> SlideRecognizerProxy::ExtractDisplayIdFromPayload(const 
 
 uint64_t SlideRecognizerProxy::ConvertDisplayIdToRsScreenId(uint64_t displayId)
 {
-    auto it = displayIdToRsScreenId_.find(displayId);
-    if (it != displayIdToRsScreenId_.end()) {
-        return it->second;
+    {
+        std::lock_guard<std::mutex> lock(displayIdMutex_);
+        auto it = displayIdToRsScreenId_.find(displayId);
+        if (it != displayIdToRsScreenId_.end()) {
+            return it->second;
+        }
     }
     OHOS::Rosen::ScreenId rsScreenId = 0;
     bool ret = OHOS::Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(
@@ -92,7 +94,10 @@ uint64_t SlideRecognizerProxy::ConvertDisplayIdToRsScreenId(uint64_t displayId)
     if (!ret) {
         return MAIN_SCREEN_ID;
     }
-    displayIdToRsScreenId_[displayId] = static_cast<uint64_t>(rsScreenId);
+    {
+        std::lock_guard<std::mutex> lock(displayIdMutex_);
+        displayIdToRsScreenId_[displayId] = static_cast<uint64_t>(rsScreenId);
+    }
     return static_cast<uint64_t>(rsScreenId);
 }
 
@@ -104,23 +109,17 @@ void SlideRecognizerProxy::OnDispatchResource(uint32_t resType, int64_t value, c
     trace_str.append(std::to_string(value));
     StartTrace(HITRACE_TAG_APP, trace_str, -1);
     uint64_t screenId = MAIN_SCREEN_ID;
-    if (resType != ResType::RES_TYPE_AXIS_EVENT) {
-        auto screenIdOpt = ExtractScreenIdFromPayload(payload);
-        if (screenIdOpt.has_value()) {
-            screenId = screenIdOpt.value();
-        } else {
-            auto displayIdOpt = ExtractDisplayIdFromPayload(payload);
-            if (displayIdOpt.has_value()) {
-                uint64_t displayId = displayIdOpt.value();
-                if (resType == ResType::RES_TYPE_CLICK_RECOGNIZE &&
-                    value == ResType::ClickEventType::TOUCH_EVENT_DOWN) {
-                    screenId = ConvertDisplayIdToRsScreenId(displayId);
-                } else {
-                    auto it = displayIdToRsScreenId_.find(displayId);
-                    screenId = (it != displayIdToRsScreenId_.end()) ? it->second : MAIN_SCREEN_ID;
-                }
-            }
-        }
+    auto screenIdOpt = ExtractScreenIdFromPayload(payload);
+    auto displayIdOpt = ExtractDisplayIdFromPayload(payload);
+    if (screenIdOpt.has_value()) {
+        screenId = screenIdOpt.value();
+    } else if (displayIdOpt.has_value() && resType == ResType::RES_TYPE_CLICK_RECOGNIZE &&
+        value == ResType::ClickEventType::TOUCH_EVENT_DOWN) {
+        screenId = ConvertDisplayIdToRsScreenId(displayIdOpt.value());
+    } else if (displayIdOpt.has_value()) {
+        std::lock_guard<std::mutex> lock(displayIdMutex_);
+        auto it = displayIdToRsScreenId_.find(displayIdOpt.value());
+        screenId = (it != displayIdToRsScreenId_.end()) ? it->second : MAIN_SCREEN_ID;
     }
     auto recognizer = GetOrCreateInstance(screenId);
     std::string screen_id_trace_str("GetOrCreateInstance screenId:");

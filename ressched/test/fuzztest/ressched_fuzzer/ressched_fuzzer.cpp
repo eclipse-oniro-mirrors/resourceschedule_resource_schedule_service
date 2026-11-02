@@ -241,7 +241,7 @@ namespace {
         slideRecognizer->HandleListFlingStart(payload);
         slideRecognizer->HandleSendFrameEvent(payload);
         slideRecognizer->HandleClickEvent(value, payload);
-        slideRecognizer->HandleSlideOFFEvent();
+        slideRecognizer->HandleSlideOFFEvent(payload);
         if (slideRecognizer->listFlingEndTask_) {
             ffrt::skip(slideRecognizer->listFlingEndTask_);
         }

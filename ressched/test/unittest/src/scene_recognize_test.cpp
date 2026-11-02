@@ -589,7 +589,7 @@ HWTEST_F(SceneRecognizeTest, SystemUpgradeSceneRecognizer_002, Function | Medium
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_OnDispatchResource_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -612,7 +612,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_OnDispatchResource_002, Function | 
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -621,7 +621,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | Medi
     EXPECT_EQ(slideRecognizer->slidePid_, "1000");
     EXPECT_EQ(slideRecognizer->slideUid_, "");
 
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(payload);
 }
 
 /**
@@ -634,7 +634,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | Medi
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleSlideOffEvent_001, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -662,7 +662,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleSlideOffEvent_001, Function |
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleClickEvent_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -702,7 +702,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleClickEvent_002, Function | Me
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_AxisSpeedFactor_001, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -719,7 +719,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_AxisSpeedFactor_001, Function | Med
     slideRecognizer->HandleClickEvent(ResType::ClickEventType::TOUCH_EVENT_UP, upPayload);
     EXPECT_EQ(slideRecognizer->GetSlideStatus(), SlideRecognizeStat::LIST_FLING);
 
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(payload);
     EXPECT_EQ(slideRecognizer->GetSlideStatus(), SlideRecognizeStat::IDLE);
 }
 
@@ -875,14 +875,13 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizerProxy_Cleanup_001, Function | Medium
 
 /**
  * @tc.name: SlideRecognizer_BuildExtInfo_001
- * @tc.desc: test extInfo carries screenId only and falls back to lastScreenId_
+ * @tc.desc: test extInfo carries screenId only and falls back to the main screen
  * @tc.type: FUNC
  * @tc.require: issue1663
  */
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_BuildExtInfo_001, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->lastScreenId_ = 1;
 
     // payload screenId wins; pid is never part of the RS registration key
     nlohmann::json payload;
@@ -892,10 +891,10 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_BuildExtInfo_001, Function | Medium
     EXPECT_EQ(extInfo["screenId"], "2");
     EXPECT_FALSE(extInfo.contains("pid"));
 
-    // missing screenId falls back to lastScreenId_ recorded by the session
+    // missing screenId falls back to the main screen
     nlohmann::json fallbackPayload;
     auto fallbackExtInfo = slideRecognizer->BuildExtInfoWithScreenId(fallbackPayload);
-    EXPECT_EQ(fallbackExtInfo["screenId"], "1");
+    EXPECT_EQ(fallbackExtInfo["screenId"], "0");
     EXPECT_FALSE(fallbackExtInfo.contains("pid"));
 }
 } // namespace ResourceSchedule

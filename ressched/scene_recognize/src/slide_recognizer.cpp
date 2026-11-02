@@ -14,7 +14,6 @@
  */
 #include "slide_recognizer.h"
 
-#include <charconv>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -35,19 +34,6 @@ namespace {
     static const uint32_t AXIS_EVENT_FACTOR = 10;
     static const char* AXIS_EVENT_TYPE = "axis_event_type";
     static const char* UP_SPEED_KEY = "up_speed";
-    static void SendFrameReportEvent(const char* methodName, uint32_t eventValue,
-        const nlohmann::json& extInfo)
-    {
-        std::string traceStr(eventValue == ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START ?
-            "SlideRecognizer:FrameReportStart " : "SlideRecognizer:FrameReportStop ");
-        traceStr.append(methodName);
-        traceStr.append(" screenId:");
-        if (extInfo.contains("screenId") && extInfo["screenId"].is_string()) {
-            traceStr.append(extInfo["screenId"].get<std::string>());
-        }
-        StartTrace(HITRACE_TAG_APP, traceStr, -1);
-        FinishTrace(HITRACE_TAG_APP);
-    }
 }
 
 SlideRecognizer::SlideRecognizer()
@@ -59,17 +45,22 @@ SlideRecognizer::~SlideRecognizer()
     RESSCHED_LOGI("~UpdatingSceneRecognizer");
 }
 
+void SlideRecognizer::ReportListFlingLockedEnd(const nlohmann::json& payload)
+{
+    std::lock_guard<ffrt::recursive_mutex> lock(stateMutex_);
+    if (slideState_ != SlideRecognizeStat::LIST_FLING) {
+        return;
+    }
+    ResSchedMgr::GetInstance().ReportData(ResType::RES_TYPE_SLIDE_RECOGNIZE,
+        ResType::SlideEventStatus::SLIDE_EVENT_OFF, payload);
+    auto extInfo = BuildExtInfoWithScreenId(payload);
+    EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
+        ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
+    slideState_ = SlideRecognizeStat::IDLE;
+}
+
 void SlideRecognizer::OnDispatchResource(uint32_t resType, int64_t value, const nlohmann::json& payload)
 {
-    std::string traceStr("SlideRecognizer:OnDispatchResource resType:");
-    traceStr.append(std::to_string(resType));
-    traceStr.append(" value:");
-    traceStr.append(std::to_string(value));
-    if (payload.contains("screenId") && payload["screenId"].is_string()) {
-        traceStr.append(" screenId:");
-        traceStr.append(payload["screenId"].get<std::string>());
-    }
-    StartTrace(HITRACE_TAG_APP, traceStr, -1);
     switch (resType) {
         case ResType::RES_TYPE_SLIDE_RECOGNIZE:
             HandleSlideEvent(value, payload);
@@ -89,7 +80,6 @@ void SlideRecognizer::OnDispatchResource(uint32_t resType, int64_t value, const 
             RESSCHED_LOGD("unknown resType");
             break;
     }
-    FinishTrace(HITRACE_TAG_APP);
 }
 
 void SlideRecognizer::HandleSlideEvent(int64_t value, const nlohmann::json& payload)
@@ -99,11 +89,11 @@ void SlideRecognizer::HandleSlideEvent(int64_t value, const nlohmann::json& payl
     } else if (value == ResType::SlideEventStatus::SLIDE_EVENT_ON) {
         HandleListFlingStart(payload);
     } else if (value == ResType::SlideEventStatus::SLIDE_EVENT_OFF) {
-        HandleSlideOFFEvent();
+        HandleSlideOFFEvent(payload);
     }
 }
 
-void SlideRecognizer::HandleSlideOFFEvent()
+void SlideRecognizer::HandleSlideOFFEvent(const nlohmann::json& payload)
 {
     std::lock_guard<ffrt::recursive_mutex> lock(stateMutex_);
     if (listFlingEndTask_) {
@@ -112,11 +102,7 @@ void SlideRecognizer::HandleSlideOFFEvent()
     if (listFlingTimeOutTask_) {
         ffrt::skip(listFlingTimeOutTask_);
     }
-    nlohmann::json extInfo;
-    // RS side registers the frame report context by screenId only (graphic_2d
-    // ressched_event_listener), keep the STOP key identical to the START key
-    extInfo["screenId"] = std::to_string(lastScreenId_);
-    SendFrameReportEvent("HandleSlideOFFEvent", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
+    auto extInfo = BuildExtInfoWithScreenId(payload);
     EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
         ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
     slideState_ = SlideRecognizeStat::IDLE;
@@ -137,16 +123,6 @@ void SlideRecognizer::HandleSlideDetecting(const nlohmann::json& payload)
 void SlideRecognizer::StartDetecting(const nlohmann::json& payload)
 {
     auto extInfo = BuildExtInfoWithScreenId(payload);
-    if (extInfo.contains("screenId") && extInfo["screenId"].is_string()) {
-        auto screenIdStr = extInfo["screenId"].get<std::string>();
-        uint64_t screenId = 0;
-        auto result = std::from_chars(screenIdStr.data(),
-            screenIdStr.data() + screenIdStr.size(), screenId);
-        if (result.ec == std::errc()) {
-            lastScreenId_ = screenId;
-        }
-    }
-    SendFrameReportEvent("StartDetecting", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
     EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
         ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
     slideDetectingTime_ = ResCommonUtil::GetNowMillTime(true);
@@ -171,7 +147,6 @@ void SlideRecognizer::HandleListFlingStart(const nlohmann::json& payload)
 {
     std::lock_guard<ffrt::recursive_mutex> lock(stateMutex_);
     auto extInfo = BuildExtInfoWithScreenId(payload);
-    SendFrameReportEvent("HandleListFlingStart", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
     EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
         ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
     if (listFlingEndTask_) {
@@ -201,7 +176,6 @@ void SlideRecognizer::HandleSendFrameEvent(const nlohmann::json& payload)
             slideState_ = SlideRecognizeStat::IDLE;
         }
         auto extInfo = BuildExtInfoWithScreenId(payload);
-        SendFrameReportEvent("HandleSendFrameEvent", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
         EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
             ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
     } else if (slideState_ == SlideRecognizeStat::LIST_FLING) {
@@ -276,7 +250,6 @@ void SlideRecognizer::HandleClickEvent(int64_t value, const nlohmann::json& payl
         // if up speed large than LIST_FLING_SPEED_LIMIT,start recognize list fling.
         if (upSpeed > listFlingSpeedLimit_) {
             auto extInfo = BuildExtInfoWithScreenId(payload);
-            SendFrameReportEvent("HandleClickEvent", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
             EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
                 ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_START, extInfo);
             ResSchedMgr::GetInstance().ReportData(ResType::RES_TYPE_SLIDE_RECOGNIZE,
@@ -307,24 +280,9 @@ nlohmann::json SlideRecognizer::BuildExtInfoWithScreenId(const nlohmann::json& p
     if (payload.contains("screenId") && payload["screenId"].is_string()) {
         extInfo["screenId"] = payload["screenId"];
     } else {
-        extInfo["screenId"] = std::to_string(lastScreenId_);
+        extInfo["screenId"] = std::to_string(MAIN_SCREEN_ID);
     }
     return extInfo;
-}
-
-void SlideRecognizer::ReportListFlingLockedEnd(const nlohmann::json& payload)
-{
-    std::lock_guard<ffrt::recursive_mutex> lock(stateMutex_);
-    if (slideState_ != SlideRecognizeStat::LIST_FLING) {
-        return;
-    }
-    ResSchedMgr::GetInstance().ReportData(ResType::RES_TYPE_SLIDE_RECOGNIZE,
-        ResType::SlideEventStatus::SLIDE_EVENT_OFF, payload);
-    auto extInfo = BuildExtInfoWithScreenId(payload);
-    SendFrameReportEvent("ReportListFlingLockedEnd", ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
-    EventListenerMgr::GetInstance().SendEvent(ResType::EventType::EVENT_DRAW_FRAME_REPORT,
-        ResType::EventValue::EVENT_VALUE_DRAW_FRAME_REPORT_STOP, extInfo);
-    slideState_ = SlideRecognizeStat::IDLE;
 }
 
 bool SlideRecognizer::IsTaskClean() const
