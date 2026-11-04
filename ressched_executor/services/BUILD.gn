@@ -31,7 +31,10 @@ config("service_private_config") {
 }
 
 ohos_shared_library("resschedexesvc") {
-  cflags_cc = [ "-fstack-protector-strong" ]
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-Os",
+  ]
   configs = [ ":service_private_config" ]
 
   public_configs = [ ":service_public_config" ]
