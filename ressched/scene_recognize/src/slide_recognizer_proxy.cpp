@@ -51,29 +51,15 @@ SlideRecognizerProxy::~SlideRecognizerProxy()
     instances_.clear();
 }
 
-std::optional<uint64_t> SlideRecognizerProxy::ExtractScreenIdFromPayload(const nlohmann::json& payload)
+std::optional<uint64_t> SlideRecognizerProxy::ExtractIdFromPayload(const nlohmann::json& payload,
+    const char* key)
 {
-    if (payload.contains(PAYLOAD_KEY_SCREEN_ID) && payload[PAYLOAD_KEY_SCREEN_ID].is_string()) {
-        auto screenIdStr = payload[PAYLOAD_KEY_SCREEN_ID].get<std::string>();
-        uint64_t screenId = 0;
-        auto result = std::from_chars(screenIdStr.data(),
-            screenIdStr.data() + screenIdStr.size(), screenId);
+    if (payload.contains(key) && payload[key].is_string()) {
+        auto idStr = payload[key].get<std::string>();
+        uint64_t id = 0;
+        auto result = std::from_chars(idStr.data(), idStr.data() + idStr.size(), id);
         if (result.ec == std::errc()) {
-            return screenId;
-        }
-    }
-    return std::nullopt;
-}
-
-std::optional<uint64_t> SlideRecognizerProxy::ExtractDisplayIdFromPayload(const nlohmann::json& payload)
-{
-    if (payload.contains(PAYLOAD_KEY_DISPLAY_ID) && payload[PAYLOAD_KEY_DISPLAY_ID].is_string()) {
-        auto displayIdStr = payload[PAYLOAD_KEY_DISPLAY_ID].get<std::string>();
-        uint64_t displayId = 0;
-        auto result = std::from_chars(displayIdStr.data(),
-            displayIdStr.data() + displayIdStr.size(), displayId);
-        if (result.ec == std::errc()) {
-            return displayId;
+            return id;
         }
     }
     return std::nullopt;
@@ -92,7 +78,7 @@ uint64_t SlideRecognizerProxy::ConvertDisplayIdToRsScreenId(uint64_t displayId)
     bool ret = OHOS::Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(
         static_cast<OHOS::Rosen::ScreenId>(displayId), rsScreenId);
     if (!ret) {
-        return MAIN_SCREEN_ID;
+        return DEFAULT_SCREEN_ID;
     }
     {
         std::lock_guard<std::mutex> lock(displayIdMutex_);
@@ -108,9 +94,9 @@ void SlideRecognizerProxy::OnDispatchResource(uint32_t resType, int64_t value, c
     trace_str.append(" value:");
     trace_str.append(std::to_string(value));
     StartTrace(HITRACE_TAG_APP, trace_str, -1);
-    uint64_t screenId = MAIN_SCREEN_ID;
-    auto screenIdOpt = ExtractScreenIdFromPayload(payload);
-    auto displayIdOpt = ExtractDisplayIdFromPayload(payload);
+    uint64_t screenId = DEFAULT_SCREEN_ID;
+    auto screenIdOpt = ExtractIdFromPayload(payload, PAYLOAD_KEY_SCREEN_ID);
+    auto displayIdOpt = ExtractIdFromPayload(payload, PAYLOAD_KEY_DISPLAY_ID);
     if (screenIdOpt.has_value()) {
         screenId = screenIdOpt.value();
     } else if (displayIdOpt.has_value() && resType == ResType::RES_TYPE_CLICK_RECOGNIZE &&
@@ -119,7 +105,7 @@ void SlideRecognizerProxy::OnDispatchResource(uint32_t resType, int64_t value, c
     } else if (displayIdOpt.has_value()) {
         std::lock_guard<std::mutex> lock(displayIdMutex_);
         auto it = displayIdToRsScreenId_.find(displayIdOpt.value());
-        screenId = (it != displayIdToRsScreenId_.end()) ? it->second : MAIN_SCREEN_ID;
+        screenId = (it != displayIdToRsScreenId_.end()) ? it->second : DEFAULT_SCREEN_ID;
     }
     auto recognizer = GetOrCreateInstance(screenId);
     std::string screen_id_trace_str("GetOrCreateInstance screenId:");

@@ -37,7 +37,7 @@ enum : uint32_t {
 static constexpr int64_t DEFAULT_LIST_FLING_TIME_OUT_TIME = 3 * 1000 * 1000;
 static constexpr int64_t DEFAULT_LIST_FLING_END_TIME = 150 * 1000;
 static constexpr float DEFAULT_LIST_FLING_SPEED_LIMIT = 3.0;
-static constexpr uint64_t MAIN_SCREEN_ID = 0;
+static constexpr uint64_t DEFAULT_SCREEN_ID = 0;
 
 class SlideRecognizer;
 
@@ -59,8 +59,7 @@ protected:
 private:
     std::shared_ptr<SlideRecognizer> GetOrCreateInstance(uint64_t screenId);
     void CleanupIdleInstances();
-    std::optional<uint64_t> ExtractScreenIdFromPayload(const nlohmann::json& payload);
-    std::optional<uint64_t> ExtractDisplayIdFromPayload(const nlohmann::json& payload);
+    std::optional<uint64_t> ExtractIdFromPayload(const nlohmann::json& payload, const char* key);
     uint64_t ConvertDisplayIdToRsScreenId(uint64_t displayId);
 
     std::unordered_map<uint64_t, std::shared_ptr<SlideRecognizer>> instances_;

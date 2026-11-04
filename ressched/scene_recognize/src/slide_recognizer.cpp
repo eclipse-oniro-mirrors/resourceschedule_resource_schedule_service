@@ -280,7 +280,7 @@ nlohmann::json SlideRecognizer::BuildExtInfoWithScreenId(const nlohmann::json& p
     if (payload.contains("screenId") && payload["screenId"].is_string()) {
         extInfo["screenId"] = payload["screenId"];
     } else {
-        extInfo["screenId"] = std::to_string(MAIN_SCREEN_ID);
+        extInfo["screenId"] = std::to_string(DEFAULT_SCREEN_ID);
     }
     return extInfo;
 }
