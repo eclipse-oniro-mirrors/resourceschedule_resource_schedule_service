@@ -757,7 +757,7 @@ bool SocPerfPlugin::HandleMoveEventBoost(const std::shared_ptr<ResData>& data, b
 {
     if (data->payload == nullptr || !data->payload.contains(BUNDLE_NAME) ||
         !data->payload[BUNDLE_NAME].is_string()) {
-        SOC_PERF_LOGE("SocPerfPlugin: socperf->MOVE_EVENT param invalid");
+        SOC_PERF_LOGD("SocPerfPlugin: socperf->MOVE_EVENT param invalid");
         return false;
     }
     std::string bundleName = data->payload[BUNDLE_NAME].get<std::string>();
@@ -1234,7 +1234,7 @@ bool SocPerfPlugin::HandleDisplayPowerWakeUp(const std::shared_ptr<ResData>& dat
     }
     if (data->value == WakeUpStatus::WAKE_UP_START) {
         std::lock_guard<ffrt::mutex> xmlLock(screenMutex_);
-        SOC_PERF_LOGI("SocPerfPlugin: socperf->HandleDisplayPowerWakeUp: %{public}lld", (long long)data->value);
+        SOC_PERF_LOGD("SocPerfPlugin: socperf->HandleDisplayPowerWakeUp: %{public}lld", (long long)data->value);
         HandleScreenOn();
 #ifdef RESOURCE_SCHEDULE_SERVICE_WITH_FFRT_ENABLE
         if (wakeUpTimeOutTask_) {
@@ -1673,7 +1673,6 @@ bool SocPerfPlugin::HandleBatteryStatusChange(const std::shared_ptr<ResData>& da
     }
     if (data->payload == nullptr || !data->payload.contains(COMMON_EVENT_CHARGE_STATE) ||
         !data->payload.at(COMMON_EVENT_CHARGE_STATE).is_number_integer()) {
-        SOC_PERF_LOGE("SocPerfPlugin: socperf->HandleBatteryStatusChange invalid data payload");
         return ret;
     }
     SOC_PERF_LOGD("SocPerfPlugin: socperf->HandleBatteryStatusChange: %{public}lld", (long long)data->value);
