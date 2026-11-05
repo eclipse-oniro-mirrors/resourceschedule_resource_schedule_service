@@ -23,6 +23,7 @@
 #include "scene_recognize_test.h"
 #include "scene_recognizer_mgr.h"
 #include "slide_recognizer.h"
+#include "slide_recognizer_proxy.h"
 #include "continuous_app_install_recognizer.h"
 #include "system_upgrade_scene_recognizer.h"
 
@@ -398,17 +399,21 @@ HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SubmitTask_002, Function | Mediu
  */
 HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SetSlideConfig_001, Function | MediumTest | Level0)
 {
-    SceneRecognizerMgr localMgr;
-    auto slideRecognizer = std::static_pointer_cast<SlideRecognizer>(
-        localMgr.sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
-    ASSERT_NE(slideRecognizer, nullptr);
+    auto& mgr = SceneRecognizerMgr::GetInstance();
+    auto slideProxy = std::static_pointer_cast<SlideRecognizerProxy>(
+        mgr.sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
+    ASSERT_NE(slideProxy, nullptr);
 
-    localMgr.SetListFlingTimeoutTime(111);
-    localMgr.SetListFlingEndTime(222);
-    localMgr.SetListFlingSpeedLimit(9.0);
-    EXPECT_EQ(slideRecognizer->listFlingTimeOutTime_, 111);
-    EXPECT_EQ(slideRecognizer->listFlingEndTime_, 222);
-    EXPECT_FLOAT_EQ(slideRecognizer->listFlingSpeedLimit_, 9.0);
+    mgr.SetListFlingTimeoutTime(111);
+    mgr.SetListFlingEndTime(222);
+    mgr.SetListFlingSpeedLimit(9.0);
+    EXPECT_EQ(slideProxy->listFlingTimeOutTime_, 111);
+    EXPECT_EQ(slideProxy->listFlingEndTime_, 222);
+    EXPECT_FLOAT_EQ(slideProxy->listFlingSpeedLimit_, 9.0);
+
+    mgr.SetListFlingTimeoutTime(DEFAULT_LIST_FLING_TIME_OUT_TIME);
+    mgr.SetListFlingEndTime(DEFAULT_LIST_FLING_END_TIME);
+    mgr.SetListFlingSpeedLimit(DEFAULT_LIST_FLING_SPEED_LIMIT);
 }
 
 /**
@@ -420,19 +425,19 @@ HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_SetSlideConfig_001, Function | M
  */
 HWTEST_F(SceneRecognizeTest, SceneRecognizerMgr_CApiSetSlideConfig_001, Function | MediumTest | Level0)
 {
-    auto slideRecognizer = std::static_pointer_cast<SlideRecognizer>(
+    auto slideProxy = std::static_pointer_cast<SlideRecognizerProxy>(
         SceneRecognizerMgr::GetInstance().sceneRecognizers_[RecognizeType::SLIDE_RECOGNIZER]);
-    ASSERT_NE(slideRecognizer, nullptr);
+    ASSERT_NE(slideProxy, nullptr);
 
     SetListFlingTimeoutTime(123);
     SetListFlingEndTime(234);
     SetListFlingSpeedLimit(8.0);
-    EXPECT_EQ(slideRecognizer->listFlingTimeOutTime_, 123);
-    EXPECT_EQ(slideRecognizer->listFlingEndTime_, 234);
-    EXPECT_FLOAT_EQ(slideRecognizer->listFlingSpeedLimit_, 8.0);
+    EXPECT_EQ(slideProxy->listFlingTimeOutTime_, 123);
+    EXPECT_EQ(slideProxy->listFlingEndTime_, 234);
+    EXPECT_FLOAT_EQ(slideProxy->listFlingSpeedLimit_, 8.0);
 
-    SetListFlingTimeoutTime(DEFAULT_LIST_FLINT_TIME_OUT_TIME);
-    SetListFlingEndTime(DEFAULT_LIST_FLINT_END_TIME);
+    SetListFlingTimeoutTime(DEFAULT_LIST_FLING_TIME_OUT_TIME);
+    SetListFlingEndTime(DEFAULT_LIST_FLING_END_TIME);
     SetListFlingSpeedLimit(DEFAULT_LIST_FLING_SPEED_LIMIT);
 }
 
@@ -584,7 +589,7 @@ HWTEST_F(SceneRecognizeTest, SystemUpgradeSceneRecognizer_002, Function | Medium
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_OnDispatchResource_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -607,7 +612,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_OnDispatchResource_002, Function | 
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -616,7 +621,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | Medi
     EXPECT_EQ(slideRecognizer->slidePid_, "1000");
     EXPECT_EQ(slideRecognizer->slideUid_, "");
 
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(payload);
 }
 
 /**
@@ -629,7 +634,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_StartDetecting_002, Function | Medi
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleSlideOffEvent_001, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -657,7 +662,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleSlideOffEvent_001, Function |
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleClickEvent_002, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -697,7 +702,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_HandleClickEvent_002, Function | Me
 HWTEST_F(SceneRecognizeTest, SlideRecognizer_AxisSpeedFactor_001, Function | MediumTest | Level0)
 {
     auto slideRecognizer = std::make_shared<SlideRecognizer>();
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(nlohmann::json());
 
     nlohmann::json payload;
     payload["clientPid"] = "1000";
@@ -714,7 +719,7 @@ HWTEST_F(SceneRecognizeTest, SlideRecognizer_AxisSpeedFactor_001, Function | Med
     slideRecognizer->HandleClickEvent(ResType::ClickEventType::TOUCH_EVENT_UP, upPayload);
     EXPECT_EQ(slideRecognizer->GetSlideStatus(), SlideRecognizeStat::LIST_FLING);
 
-    slideRecognizer->HandleSlideOFFEvent();
+    slideRecognizer->HandleSlideOFFEvent(payload);
     EXPECT_EQ(slideRecognizer->GetSlideStatus(), SlideRecognizeStat::IDLE);
 }
 
@@ -756,6 +761,141 @@ HWTEST_F(SceneRecognizeTest, DispatchResource_001, Function | MediumTest | Level
     auto resData = make_shared<ResData>(0, 0, payload);
     SceneRecognizerMgr::GetInstance().DispatchResource(resData);
     EXPECT_EQ(SceneRecognizerMgr::GetInstance().ffrtQueue_, nullptr);
+}
+
+/**
+ * @tc.name: SlideRecognizerProxy_Routing_001
+ * @tc.desc: test proxy routes by screenId: same-screen reuse, cross-screen isolation,
+ *           RS frame echo routing and displayId conversion
+ * @tc.type: FUNC
+ * @tc.require: issue1663
+ */
+HWTEST_F(SceneRecognizeTest, SlideRecognizerProxy_Routing_001, Function | MediumTest | Level0)
+{
+    auto proxy = std::make_shared<SlideRecognizerProxy>();
+
+    // same screen: two clientPids share one instance
+    nlohmann::json downA;
+    downA["screenId"] = "5";
+    downA["clientPid"] = "100";
+    proxy->OnDispatchResource(ResType::RES_TYPE_CLICK_RECOGNIZE,
+        ResType::ClickEventType::TOUCH_EVENT_DOWN, downA);
+    nlohmann::json downB;
+    downB["screenId"] = "5";
+    downB["clientPid"] = "200";
+    proxy->OnDispatchResource(ResType::RES_TYPE_CLICK_RECOGNIZE,
+        ResType::ClickEventType::TOUCH_EVENT_DOWN, downB);
+    EXPECT_EQ(proxy->instances_.size(), static_cast<size_t>(1));
+    EXPECT_TRUE(proxy->instances_[5]->isInTouching_);
+
+    // cross screen: isolated instances
+    nlohmann::json downC;
+    downC["screenId"] = "6";
+    downC["clientPid"] = "100";
+    proxy->OnDispatchResource(ResType::RES_TYPE_CLICK_RECOGNIZE,
+        ResType::ClickEventType::TOUCH_EVENT_DOWN, downC);
+    EXPECT_EQ(proxy->instances_.size(), static_cast<size_t>(2));
+
+    // RS frame echo carries screenId only and drives that screen's instance
+    proxy->instances_[5]->slideState_ = SlideRecognizeStat::SLIDE_NORMAL_DETECTING;
+    proxy->instances_[6]->slideState_ = SlideRecognizeStat::SLIDE_NORMAL_DETECTING;
+    proxy->instances_[5]->isInTouching_ = true;
+    proxy->instances_[6]->isInTouching_ = true;
+    nlohmann::json framePayload;
+    framePayload["screenId"] = "5";
+    proxy->OnDispatchResource(ResType::RES_TYPE_SEND_FRAME_EVENT, 0, framePayload);
+    EXPECT_EQ(proxy->instances_[5]->GetSlideStatus(), SlideRecognizeStat::SLIDE_NORMAL);
+    EXPECT_EQ(proxy->instances_[6]->GetSlideStatus(), SlideRecognizeStat::SLIDE_NORMAL_DETECTING);
+
+    // RS frame echo with an unknown screen creates an IDLE instance without side effects
+    nlohmann::json unknownPayload;
+    unknownPayload["screenId"] = "99";
+    proxy->OnDispatchResource(ResType::RES_TYPE_SEND_FRAME_EVENT, 0, unknownPayload);
+    auto unknownIt = proxy->instances_.find(99);
+    ASSERT_NE(unknownIt, proxy->instances_.end());
+    EXPECT_EQ(unknownIt->second->GetSlideStatus(), SlideRecognizeStat::IDLE);
+}
+
+/**
+ * @tc.name: SlideRecognizerProxy_DisplayId_001
+ * @tc.desc: test displayId is converted to rs screen id for routing and reused from cache
+ * @tc.type: FUNC
+ * @tc.require: issue1663
+ */
+HWTEST_F(SceneRecognizeTest, SlideRecognizerProxy_DisplayId_001, Function | MediumTest | Level0)
+{
+    auto proxy = std::make_shared<SlideRecognizerProxy>();
+    // seed the displayId->rsScreenId cache so routing is deterministic without display manager
+    proxy->displayIdToRsScreenId_[7] = 42;
+
+    // touch down with displayId converts to the cached rs screen id for the routing key
+    nlohmann::json downPayload;
+    downPayload["displayId"] = "7";
+    downPayload["clientPid"] = "100";
+    proxy->OnDispatchResource(ResType::RES_TYPE_CLICK_RECOGNIZE,
+        ResType::ClickEventType::TOUCH_EVENT_DOWN, downPayload);
+    EXPECT_NE(proxy->instances_.find(42), proxy->instances_.end());
+
+    // other events with the same displayId reuse the cached value and the same instance
+    nlohmann::json upPayload;
+    upPayload["displayId"] = "7";
+    upPayload["clientPid"] = "100";
+    proxy->OnDispatchResource(ResType::RES_TYPE_CLICK_RECOGNIZE,
+        ResType::ClickEventType::TOUCH_EVENT_UP, upPayload);
+    EXPECT_EQ(proxy->instances_.size(), static_cast<size_t>(1));
+}
+
+/**
+ * @tc.name: SlideRecognizerProxy_Cleanup_001
+ * @tc.desc: test idle instance cleanup when exceeding MAX_INSTANCE_COUNT
+ * @tc.type: FUNC
+ * @tc.require: issue1663
+ */
+HWTEST_F(SceneRecognizeTest, SlideRecognizerProxy_Cleanup_001, Function | MediumTest | Level0)
+{
+    auto proxy = std::make_shared<SlideRecognizerProxy>();
+
+    // a busy (non-IDLE) instance must survive cleanup
+    auto busyInstance = proxy->GetOrCreateInstance(1);
+    ASSERT_NE(busyInstance, nullptr);
+    busyInstance->slideState_ = SlideRecognizeStat::LIST_FLING;
+
+    // instances up to MAX_INSTANCE_COUNT are kept even when all idle
+    for (uint64_t screenId = 2; screenId <= SlideRecognizerProxy::MAX_INSTANCE_COUNT; screenId++) {
+        ASSERT_NE(proxy->GetOrCreateInstance(screenId), nullptr);
+    }
+    EXPECT_EQ(proxy->instances_.size(), SlideRecognizerProxy::MAX_INSTANCE_COUNT);
+
+    // exceeding the cap triggers cleanup: idle instances are removed, the busy one survives
+    ASSERT_NE(proxy->GetOrCreateInstance(1000), nullptr);
+    EXPECT_NE(proxy->instances_.find(1), proxy->instances_.end());
+    EXPECT_EQ(proxy->instances_.find(2), proxy->instances_.end());
+    EXPECT_LE(proxy->instances_.size(), SlideRecognizerProxy::MAX_INSTANCE_COUNT);
+}
+
+/**
+ * @tc.name: SlideRecognizer_BuildExtInfo_001
+ * @tc.desc: test extInfo carries screenId only and falls back to the main screen
+ * @tc.type: FUNC
+ * @tc.require: issue1663
+ */
+HWTEST_F(SceneRecognizeTest, SlideRecognizer_BuildExtInfo_001, Function | MediumTest | Level0)
+{
+    auto slideRecognizer = std::make_shared<SlideRecognizer>();
+
+    // payload screenId wins; pid is never part of the RS registration key
+    nlohmann::json payload;
+    payload["screenId"] = "2";
+    payload["clientPid"] = "1234";
+    auto extInfo = slideRecognizer->BuildExtInfoWithScreenId(payload);
+    EXPECT_EQ(extInfo["screenId"], "2");
+    EXPECT_FALSE(extInfo.contains("pid"));
+
+    // missing screenId falls back to the main screen
+    nlohmann::json fallbackPayload;
+    auto fallbackExtInfo = slideRecognizer->BuildExtInfoWithScreenId(fallbackPayload);
+    EXPECT_EQ(fallbackExtInfo["screenId"], "0");
+    EXPECT_FALSE(fallbackExtInfo.contains("pid"));
 }
 } // namespace ResourceSchedule
 } // namespace OHOS
