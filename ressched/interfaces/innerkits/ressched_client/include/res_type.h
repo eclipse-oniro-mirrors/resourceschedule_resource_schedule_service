@@ -467,6 +467,8 @@ enum : uint32_t {
     RES_TYPE_DIALOG_SHOW_EVENT = 225,
     // report lv into app inim task
     RES_TYPE_LV_INTO_INIM = 226,
+    // report camera torch state change
+    RES_TYPE_CAMERA_TORCH_STATE_CHANGE = 227,
     // report delay task perf sched
     RES_TYPE_DELAY_TASK_PERF = 228,
     // last async resType

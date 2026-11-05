@@ -1111,6 +1111,13 @@ enum NfcSignalState : int64_t {
     READ_END = 1,
 };
 
+/**
+ * @brief torch state
+ */
+enum TorchState : int64_t {
+    TORCH_OFF = 0,
+    TORCH_ON = 1,
+};
 } // namespace ResType
 } // namespace ResourceSchedule
 } // namespace OHOS
