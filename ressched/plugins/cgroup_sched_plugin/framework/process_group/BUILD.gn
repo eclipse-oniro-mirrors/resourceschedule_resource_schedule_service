@@ -60,5 +60,8 @@ ohos_shared_library("libprocess_group") {
 
   asmflags = [ "-Wl,-z,relro,-z,now" ]
 
-  cflags_cc = [ "-fstack-protector-strong" ]
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-Os",
+  ]
 }

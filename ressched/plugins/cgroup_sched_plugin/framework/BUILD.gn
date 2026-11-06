@@ -78,5 +78,8 @@ ohos_shared_library("cgroup_sched") {
 
   asmflags = [ "-Wl,-z,relro,-z,now" ]
 
-  cflags_cc = [ "-fstack-protector-strong" ]
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-Os",
+  ]
 }
