@@ -471,6 +471,8 @@ enum : uint32_t {
     RES_TYPE_CAMERA_TORCH_STATE_CHANGE = 227,
     // report delay task perf sched
     RES_TYPE_DELAY_TASK_PERF = 228,
+    // report perf pull service extension
+    RES_TYPE_EXTENSION_START_PERF = 229,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType
