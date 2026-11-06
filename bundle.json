@@ -124,6 +124,7 @@
             "header_files": [
               "res_sa_init.h",
               "res_sched_client.h",
+              "res_sched_json_client.h",
               "res_sched_errors.h",
               "res_type.h",
               "res_sched_ipc_interface_code.h",

@@ -51,6 +51,7 @@ public:
  */
 class ResSchedClient {
     friend ResSchedSvcStatusChange;
+    friend class ResSchedJsonClient;
 public:
     /**
      * @brief Get the Instance object.
@@ -71,6 +72,8 @@ public:
     /**
      * @brief Report the synchronization event to the resource schedule service.
      *
+     * @deprecated Deprecated. Use ResSchedJsonClient::GetInstance().ReportSyncEvent instead.
+     *             This overload will be removed after all callers have been migrated.
      * @param resType Indicates the resource type, all of the type have listed in res_type.h.
      * @param value Indicates the value of the resource type, defined by the developers.
      * @param payload Indicates the context info of the resource type event.
@@ -179,8 +182,6 @@ private:
     int32_t InitInnerEventListenerLocked();
     void UnRegisterSystemloadListenersLocked();
     void UnRegisterEventListenerLocked(uint32_t eventType, uint32_t listenerGroup);
-    int32_t ReportMutexBeforeStartEvent(const uint32_t resType, const int64_t value,
-        const nlohmann::json& payload, nlohmann::json& reply, sptr<IResSchedService>& proxy);
     void RecoverEventListener();
     void ReportConnectError(const std::string& reason);
     void ReportDiscardEventError(const uint32_t resType);

@@ -22,6 +22,7 @@
 #include "res_ipc_init.h"
 #include "res_sa_init.h"
 #include "res_sched_client.h"
+#include "res_sched_json_client.h"
 #include "res_type.h"
 #include "res_sched_systemload_notifier_client.h"
 #include "res_sched_event_listener.h"
@@ -183,7 +184,7 @@ static void StartReportSyncEvent()
     payload.emplace("pid", 1);
     payload.emplace("reason", "test_reason");
     nlohmann::json reply;
-    int32_t ret = ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    int32_t ret = ResSchedJsonClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
     // 权限校验失败，返回err
     EXPECT_NE(ret, 0);
     EXPECT_TRUE(ResSchedClient::GetInstance().rss_);
@@ -214,7 +215,7 @@ HWTEST_F(ResSchedClientTest, ReportSyncEvent, Function | MediumTest | Level0)
     payload.emplace("pid", 1);
     payload.emplace("reason", "test_reason");
     nlohmann::json reply;
-    int32_t ret = ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    int32_t ret = ResSchedJsonClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
     // 权限校验失败，返回err
     EXPECT_NE(ret, 0);
 }

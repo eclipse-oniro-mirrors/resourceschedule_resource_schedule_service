@@ -342,6 +342,7 @@ ohos_static_library("resschedsvc_static") {
     "hitrace:libhitracechain",
     "init:libbegetutil",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
     "jsoncpp:jsoncpp",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",

@@ -21,6 +21,7 @@
 #include "ipc_skeleton.h"
 #include "nativetoken_kit.h"
 #include "res_sched_client.h"
+#include "res_sched_json_client.h"
 #include "token_setproc.h"
 #include "nlohmann/json.hpp"
 
@@ -148,7 +149,8 @@ static void ReportSyncEventTest(int32_t argc, char *argv[])
         payload[argv[i]] = argv[i + 1];
     }
     nlohmann::json reply;
-    int32_t res = OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, value, payload, reply);
+    int32_t res = OHOS::ResourceSchedule::ResSchedJsonClient::GetInstance().ReportSyncEvent(resType,
+        value, payload, reply);
     std::cout << "ReportSyncEvent result: " << res << std::endl;
     std::cout << "Reply content: " << reply.dump() << std::endl;
 }
