@@ -123,6 +123,8 @@ int32_t ResSchedClient::ReportSyncEvent(const uint32_t resType, const int64_t va
 static int32_t ReportMutexBeforeStartEvent(const uint32_t resType, const int64_t value,
     const nlohmann::json& payload, nlohmann::json& reply, sptr<IResSchedService>& proxy)
 {
+    RESSCHED_LOGD("%{public}s: resType=%{public}u, value=%{public}lld.", __func__, resType,
+        static_cast<long long>(value));
     auto mtx = std::make_shared<ffrt::mutex>();
     auto cv = std::make_shared<ffrt::condition_variable>();
     auto result = std::make_shared<std::pair<int32_t, nlohmann::json>>();

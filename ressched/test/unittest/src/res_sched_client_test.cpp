@@ -221,6 +221,39 @@ HWTEST_F(ResSchedClientTest, ReportSyncEvent, Function | MediumTest | Level0)
 }
 
 /**
+ * @tc.name: ReportSyncEventMapPayload001
+ * @tc.desc: test func ReportSyncEvent with unordered_map payload
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedClientTest, ReportSyncEventMapPayload001, Function | MediumTest | Level0)
+{
+    uint32_t resType = ResType::SYNC_RES_TYPE_THAW_ONE_APP;
+    std::unordered_map<std::string, std::string> payload;
+    payload.emplace("pid", "1");
+    payload.emplace("reason", "test_reason");
+    std::unordered_map<std::string, std::string> reply;
+    int32_t ret = ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    // 权限校验失败，返回err
+    EXPECT_NE(ret, 0);
+}
+
+/**
+ * @tc.name: ReportSyncEventMutexBeforeStart001
+ * @tc.desc: test func ReportSyncEvent with SYNC_RES_TYPE_CHECK_MUTEX_BEFORE_START
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedClientTest, ReportSyncEventMutexBeforeStart001, Function | MediumTest | Level0)
+{
+    uint32_t resType = ResType::SYNC_RES_TYPE_CHECK_MUTEX_BEFORE_START;
+    nlohmann::json payload;
+    payload.emplace("pid", 1);
+    nlohmann::json reply;
+    int32_t ret = ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    // 权限校验失败或超时，返回err
+    EXPECT_NE(ret, 0);
+}
+
+/**
  * @tc.name: RegisterSystemloadNotifier001
  * @tc.desc: Register systemload notifier
  * @tc.type: FUNC
