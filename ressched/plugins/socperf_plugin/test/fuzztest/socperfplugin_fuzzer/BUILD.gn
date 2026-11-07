@@ -37,6 +37,7 @@ ohos_fuzztest("SocperfPluginFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
     "resource_schedule_service:ressched_client",
     "soc_perf:socperf_client",
   ]

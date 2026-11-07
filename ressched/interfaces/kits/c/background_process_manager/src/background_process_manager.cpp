@@ -16,6 +16,7 @@
 #include "background_process_manager.h"
 #include "res_sched_log.h"
 #include "res_sched_client.h"
+#include "nlohmann/json.hpp"
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
 

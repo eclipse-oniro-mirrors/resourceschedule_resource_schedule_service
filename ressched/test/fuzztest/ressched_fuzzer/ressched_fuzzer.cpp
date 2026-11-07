@@ -37,6 +37,7 @@
 #include "slide_recognizer.h"
 #include "ffrt_inner.h"
 #include "res_sched_client.h"
+#include "nlohmann/json.hpp"
 #include "res_sched_service_stub.h"
 #include "res_sched_systemload_notifier_client.h"
 #include "res_sched_systemload_notifier_proxy.h"

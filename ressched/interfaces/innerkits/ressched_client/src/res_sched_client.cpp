@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "res_sched_client.h"
+#include "res_sched_json_client.h"
 #include <string>                       // for to_string
 #include <unistd.h>                     // for getpid
 #include <new>                          // for nothrow, operator new
@@ -43,6 +44,12 @@ bool g_isReportConnectErr = false;
 ResSchedClient& ResSchedClient::GetInstance()
 {
     static ResSchedClient instance;
+    return instance;
+}
+
+ResSchedJsonClient& ResSchedJsonClient::GetInstance()
+{
+    static ResSchedJsonClient instance;
     return instance;
 }
 ResSchedClient::~ResSchedClient()
@@ -110,28 +117,14 @@ void ResSchedClient::ReportData(uint32_t resType, int64_t value,
 int32_t ResSchedClient::ReportSyncEvent(const uint32_t resType, const int64_t value, const nlohmann::json& payload,
     nlohmann::json& reply)
 {
-    RESSCHED_LOGD("%{public}s: resType=%{public}u, value=%{public}lld.", __func__, resType, (long long)value);
-
-    sptr<IResSchedService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        RESSCHED_LOGD("%{public}s: fail to get rss.", __func__);
-        return RES_SCHED_CONNECT_FAIL;
-    }
-    std::string payloadValue = payload.dump(-1, ' ', false, nlohmann::detail::error_handler_t::replace);
-    if (resType == ResType::SYNC_RES_TYPE_CHECK_MUTEX_BEFORE_START) {
-        return ReportMutexBeforeStartEvent(resType, value, payload, reply, proxy);
-    } else {
-        int32_t ret;
-        std::string replyValue;
-        proxy->ReportSyncEvent(resType, value, payloadValue, replyValue, ret);
-        reply = StringToJsonObj(replyValue);
-        return ret;
-    }
+    return ResSchedJsonClient::GetInstance().ReportSyncEvent(resType, value, payload, reply);
 }
 
-int32_t ResSchedClient::ReportMutexBeforeStartEvent(const uint32_t resType, const int64_t value,
+static int32_t ReportMutexBeforeStartEvent(const uint32_t resType, const int64_t value,
     const nlohmann::json& payload, nlohmann::json& reply, sptr<IResSchedService>& proxy)
 {
+    RESSCHED_LOGD("%{public}s: resType=%{public}u, value=%{public}lld.", __func__, resType,
+        static_cast<long long>(value));
     auto mtx = std::make_shared<ffrt::mutex>();
     auto cv = std::make_shared<ffrt::condition_variable>();
     auto result = std::make_shared<std::pair<int32_t, nlohmann::json>>();
@@ -175,6 +168,28 @@ int32_t ResSchedClient::ReportMutexBeforeStartEvent(const uint32_t resType, cons
     return result->first;
 }
 
+int32_t ResSchedJsonClient::ReportSyncEvent(const uint32_t resType, const int64_t value, const nlohmann::json& payload,
+    nlohmann::json& reply)
+{
+    RESSCHED_LOGD("%{public}s: resType=%{public}u, value=%{public}lld.", __func__, resType, (long long)value);
+
+    sptr<IResSchedService> proxy = ResSchedClient::GetInstance().GetProxy();
+    if (proxy == nullptr) {
+        RESSCHED_LOGD("%{public}s: fail to get rss.", __func__);
+        return RES_SCHED_CONNECT_FAIL;
+    }
+    std::string payloadValue = payload.dump(-1, ' ', false, nlohmann::detail::error_handler_t::replace);
+    if (resType == ResType::SYNC_RES_TYPE_CHECK_MUTEX_BEFORE_START) {
+        return ReportMutexBeforeStartEvent(resType, value, payload, reply, proxy);
+    } else {
+        int32_t ret;
+        std::string replyValue;
+        proxy->ReportSyncEvent(resType, value, payloadValue, replyValue, ret);
+        reply = StringToJsonObj(replyValue);
+        return ret;
+    }
+}
+
 int32_t ResSchedClient::ReportSyncEvent(const uint32_t resType, const int64_t value,
     const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
@@ -183,7 +198,7 @@ int32_t ResSchedClient::ReportSyncEvent(const uint32_t resType, const int64_t va
     for (auto it = payload.begin(); it != payload.end(); ++it) {
         tmpPayload[it->first] = it->second;
     }
-    auto res = ReportSyncEvent(resType, value, tmpPayload, tmpReply);
+    auto res = ResSchedJsonClient::GetInstance().ReportSyncEvent(resType, value, tmpPayload, tmpReply);
     for (const auto& pair : tmpReply.items()) {
         reply[pair.key()] = pair.value().dump();
     }

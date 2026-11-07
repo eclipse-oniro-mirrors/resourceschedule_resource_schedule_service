@@ -14,6 +14,7 @@
  */
 
 #include "kill_event_listener.h"
+#include "res_sched_json_client.h"
 #include "res_sched_log.h"
 
 namespace OHOS {
@@ -150,7 +151,7 @@ void KillEventListener::InitKillConfig()
     }
     nlohmann::json payload;
     nlohmann::json reply;
-    int32_t ret = ResSchedClient::GetInstance().ReportSyncEvent(ResType::RES_TYPE_LOAD_KILL_REASON_CONFIG, 0,
+    int32_t ret = ResSchedJsonClient::GetInstance().ReportSyncEvent(ResType::RES_TYPE_LOAD_KILL_REASON_CONFIG, 0,
         payload, reply);
     if (ret != 0) {
         RESSCHED_LOGE("reskillreason:InitKillConfig failed,ret:%{public}d", ret);
