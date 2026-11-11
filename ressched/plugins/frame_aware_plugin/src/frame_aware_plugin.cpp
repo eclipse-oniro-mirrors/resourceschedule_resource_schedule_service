@@ -36,8 +36,7 @@ namespace {
 }
 IMPLEMENT_SINGLE_INSTANCE(FrameAwarePlugin)
 
-std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>>
-FrameAwarePlugin::BuildFunctionMap()
+FrameAwarePlugin::FunctionMap FrameAwarePlugin::BuildFunctionMap()
 {
     return {
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
@@ -317,7 +316,7 @@ void FrameAwarePlugin::DispatchResource(const std::shared_ptr<ResData>& data)
 {
     RME_LOGD("FrameAwarePlugin:DispatchResource type:%{public}u, value:%{public}lld",
              data->resType, (long long)data->value);
-    std::function<void(const std::shared_ptr<ResData>)> function;
+    ResHandler function;
     {
         // Only copy the handler out under the lock, so that Disable() never waits for a running handler
         // and the copied handler stays valid even if functionMap is cleared concurrently.
