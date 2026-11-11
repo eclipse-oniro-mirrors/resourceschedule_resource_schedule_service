@@ -36,10 +36,10 @@ namespace {
 }
 IMPLEMENT_SINGLE_INSTANCE(FrameAwarePlugin)
 
-void FrameAwarePlugin::Init()
+std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>>
+FrameAwarePlugin::BuildFunctionMap()
 {
-    netLatCtrl.Init();
-    std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>> newFunctionMap = {
+    return {
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
         { RES_TYPE_APP_STATE_CHANGE,
             [this](const std::shared_ptr<ResData>& data) { HandleAppStateChange(data); } },
@@ -65,6 +65,12 @@ void FrameAwarePlugin::Init()
         { RES_TYPE_NETWORK_LATENCY_REQUEST,
             [this](const std::shared_ptr<ResData>& data) { HandleNetworkLatencyRequest(data); } },
     };
+}
+
+void FrameAwarePlugin::Init()
+{
+    netLatCtrl.Init();
+    auto newFunctionMap = BuildFunctionMap();
     std::set<uint32_t> newResTypes = {
         RES_TYPE_APP_STATE_CHANGE,
         RES_TYPE_PROCESS_STATE_CHANGE,

@@ -47,6 +47,7 @@ private:
     std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>> functionMap;
     std::set<std::string> unsupportApp = {};
     NetworkLatencyController netLatCtrl;
+    std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>> BuildFunctionMap();
     void HandleAppStateChange(const std::shared_ptr<ResData>& data);
     void HandleProcessStateChange(const std::shared_ptr<ResData>& data);
     void HandleContinuousTask(const std::shared_ptr<ResData>& data);
