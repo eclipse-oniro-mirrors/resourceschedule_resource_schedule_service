@@ -202,6 +202,7 @@ namespace {
         { ResType::RES_TYPE_MODEM_PA_HIGH_POWER_ABNORMAL, { 1201 } },
         { ResType::RES_TYPE_APP_HIGH_POWER_CONSUMPTION, { 1201 } },
         { ResType::RES_TYPE_APP_ABILITY_START, { 5523 } },
+        { ResType::RES_TYPE_INTELLIGENT_TASK_SCHED, { 5523 } },
         { ResType::RES_TYPE_EXTENSION_START_PERF, { 5523 } },
         { ResType::RES_TYPE_PRELOAD_APPLICATION, { 5523 } },
         { ResType::RES_TYPE_APP_ASSOCIATED_START, { 5523 } },
