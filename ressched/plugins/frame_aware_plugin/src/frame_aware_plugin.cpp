@@ -14,6 +14,7 @@
  */
 
 #include "frame_aware_plugin.h"
+#include <utility>
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
 #include "frame_msg_intf.h"
 #endif
@@ -35,10 +36,9 @@ namespace {
 }
 IMPLEMENT_SINGLE_INSTANCE(FrameAwarePlugin)
 
-void FrameAwarePlugin::Init()
+FrameAwarePlugin::FunctionMap FrameAwarePlugin::BuildFunctionMap()
 {
-    netLatCtrl.Init();
-    functionMap = {
+    return {
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
         { RES_TYPE_APP_STATE_CHANGE,
             [this](const std::shared_ptr<ResData>& data) { HandleAppStateChange(data); } },
@@ -64,7 +64,13 @@ void FrameAwarePlugin::Init()
         { RES_TYPE_NETWORK_LATENCY_REQUEST,
             [this](const std::shared_ptr<ResData>& data) { HandleNetworkLatencyRequest(data); } },
     };
-    resTypes = {
+}
+
+void FrameAwarePlugin::Init()
+{
+    netLatCtrl.Init();
+    auto newFunctionMap = BuildFunctionMap();
+    std::set<uint32_t> newResTypes = {
         RES_TYPE_APP_STATE_CHANGE,
         RES_TYPE_PROCESS_STATE_CHANGE,
         RES_TYPE_CONTINUOUS_TASK,
@@ -77,7 +83,13 @@ void FrameAwarePlugin::Init()
         RES_TYPE_SCREEN_STATUS,
         RES_TYPE_USER_INTERACTION_SCENE,
     };
-    for (auto resType : resTypes) {
+    {
+        // Publish the new handler map before subscribing, so that no event is lost after subscription.
+        std::lock_guard<std::mutex> autoLock(functionMapMutex_);
+        functionMap = std::move(newFunctionMap);
+        resTypes = newResTypes;
+    }
+    for (auto resType : newResTypes) {
         PluginMgr::GetInstance().SubscribeResource(LIB_NAME, resType);
     }
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
@@ -88,14 +100,19 @@ void FrameAwarePlugin::Init()
 
 void FrameAwarePlugin::Disable()
 {
-    for (auto resType : resTypes) {
+    std::set<uint32_t> disabledResTypes;
+    {
+        // Stop dispatching at once, and the in-flight handlers (already copied out by DispatchResource) finish safely.
+        std::lock_guard<std::mutex> autoLock(functionMapMutex_);
+        disabledResTypes.swap(resTypes);
+        functionMap.clear();
+    }
+    for (auto resType : disabledResTypes) {
         PluginMgr::GetInstance().UnSubscribeResource(LIB_NAME, resType);
     }
 #ifdef RESSCHED_FRAME_AWARE_SCHED_ENABLE
     RME::FrameMsgIntf::GetInstance().Stop();
 #endif
-    functionMap.clear();
-    resTypes.clear();
     RME_LOGI("FrameAwarePlugin::Disable ueaServer success");
 }
 
@@ -299,12 +316,18 @@ void FrameAwarePlugin::DispatchResource(const std::shared_ptr<ResData>& data)
 {
     RME_LOGD("FrameAwarePlugin:DispatchResource type:%{public}u, value:%{public}lld",
              data->resType, (long long)data->value);
-    auto funcIter = functionMap.find(data->resType);
-    if (funcIter != functionMap.end()) {
-        auto function = funcIter->second;
-        if (function) {
-            function(data);
+    ResHandler function;
+    {
+        // Only copy the handler out under the lock, so that Disable() never waits for a running handler
+        // and the copied handler stays valid even if functionMap is cleared concurrently.
+        std::lock_guard<std::mutex> autoLock(functionMapMutex_);
+        auto funcIter = functionMap.find(data->resType);
+        if (funcIter != functionMap.end()) {
+            function = funcIter->second;
         }
+    }
+    if (function) {
+        function(data);
     }
 }
 

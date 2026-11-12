@@ -16,6 +16,8 @@
 #ifndef FRAME_AWARE_PLUGIN_H
 #define FRAME_AWARE_PLUGIN_H
 
+#include <functional>
+#include <mutex>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -38,10 +40,16 @@ public:
     void Disable() override;
     void DispatchResource(const std::shared_ptr<ResData>& resData) override;
 private:
+    using ResHandler = std::function<void(const std::shared_ptr<ResData> data)>;
+    using FunctionMap = std::unordered_map<uint32_t, ResHandler>;
+    // Protects functionMap and resTypes, which are written by Init()/Disable() on the plugin lifecycle thread
+    // and read by DispatchResource() on the resource dispatch thread.
+    std::mutex functionMapMutex_;
     std::set<uint32_t> resTypes;
-    std::unordered_map<uint32_t, std::function<void(const std::shared_ptr<ResData> data)>> functionMap;
+    FunctionMap functionMap;
     std::set<std::string> unsupportApp = {};
     NetworkLatencyController netLatCtrl;
+    FunctionMap BuildFunctionMap();
     void HandleAppStateChange(const std::shared_ptr<ResData>& data);
     void HandleProcessStateChange(const std::shared_ptr<ResData>& data);
     void HandleContinuousTask(const std::shared_ptr<ResData>& data);
