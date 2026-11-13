@@ -197,8 +197,8 @@ void EventListenerMgr::SendEventLock(uint32_t eventType, uint32_t eventValue, co
             if (it != listeners->second.end() && it->second.groups.count(listenerGroup) == 1) {
                 listenerArray.push_back(it->second.listener);
             } else {
-                RESSCHED_LOGD("eventType:%{public}d targetPid:%{public}d not registered or listenerGroup:%{public}d "
-                    "not matched, event dropped.", eventType, targetPid, listenerGroup);   
+                RESSCHED_LOGD("eventType:%{public}d targetPid:%{public}d not registered or listenerGroup:%{public}d"
+                    " not matched, event dropped.", eventType, targetPid, listenerGroup);   
             }
         } else {
             for (auto& listenerItem : listeners->second) {
