@@ -911,7 +911,7 @@ void CgroupEventHandler::HandleReportAudioCapTureState(uint32_t resType, int64_t
     }
  
     if (!ParseValue(uid, "uid", payload) || !ParseValue(pid, "pid", payload)) {
-        CGS_LOGE("%{public}s : payload does not contain uid or pid", __func__);
+        CGS_LOGD("%{public}s : payload does not contain uid or pid", __func__);
         return;
     }
     if (uid <= 0 || pid <= 0) {
