@@ -1080,6 +1080,14 @@ enum BackgroundLoaderState : uint32_t {
 };
 
 /**
+ * @brief backgroundLoader task status
+ */
+enum BackgroundLoaderTaskStatus : uint32_t {
+    TASK_START = 0,
+    TASK_FINISH = 1,
+};
+
+/**
  * @brief dfx control image code
  */
 enum DFXCtrlImageCode : int32_t {
