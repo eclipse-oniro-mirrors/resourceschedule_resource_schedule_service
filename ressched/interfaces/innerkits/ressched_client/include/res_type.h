@@ -479,6 +479,10 @@ enum : uint32_t {
     RES_TYPE_BACKGROUND_LOADER_TASK_STATUS_CHANGE = 231,
     // report anco foreground state, value 1: anco app in foreground, value 0: all anco apps in background
     RES_TYPE_ANCO_FOREGROUND_STATE = 232,
+    // notify continuous task info; value is CONTINUOUS_TASK_NOTIFICATION_TYPE; payload:uid,notificationType,isStart
+    RES_TYPE_NOTIFY_CONTINUOUS_TASK_INFO = 233,
+    // notify task detection result info
+    RES_TYPE_TASK_DETECTION_RESULT = 234,
     // nweb create event for exact_preread
     RES_TYPE_NWEB_CREATE = 235,
     // last async resType
