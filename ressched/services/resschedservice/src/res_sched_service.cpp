@@ -499,11 +499,6 @@ ErrCode ResSchedService::GetSystemloadLevel(int32_t& resultValue)
 
 ErrCode ResSchedService::GetResTypeList(std::set<uint32_t>& resTypeList)
 {
-    int32_t checkResult = RemoteRequestCheck();
-    if (checkResult != ERR_OK) {
-        RESSCHED_LOGE("check remote request fail. errorcode: %{public}d", checkResult);
-        return checkResult;
-    }
     PluginMgr::GetInstance().GetResTypeList(resTypeList);
     return ERR_OK;
 }
