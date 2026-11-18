@@ -82,6 +82,8 @@ private:
     std::mutex capturerMutex_;
     std::unordered_map<int32_t, std::unordered_set<int32_t>> capturerStateMap_;
     std::unordered_map<int32_t, int32_t> capturerInfoPidToUidMap_;
+
+    std::mutex volumeMutex_;
 };
 } // namespace ResourceSchedule
 } // namespace OHOS

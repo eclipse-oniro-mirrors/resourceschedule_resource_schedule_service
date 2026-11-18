@@ -97,6 +97,7 @@ void AudioObserver::OnVolumeKeyEvent(AudioStandard::VolumeEvent volumeEvent)
 {
     RESSCHED_LOGI("enter AudioVolumeKeyObserver::OnVolumeKeyEvent, streamType: %{public}d, volumeLevel: %{public}d",
         volumeEvent.volumeType, volumeEvent.volume);
+    std::lock_guard<std::mutex> lock(volumeMutex_);
     auto item = volumeState_.find(volumeEvent.volumeType);
     if (item != volumeState_.end() && item->second == volumeEvent.volume) {
         RESSCHED_LOGD("volume not change");
@@ -121,6 +122,7 @@ void AudioObserver::OnAudioSceneChange(const AudioStandard::AudioScene audioScen
 void AudioObserver::OnPreferredOutputDeviceUpdated(
     const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &descs)
 {
+    std::lock_guard<std::mutex> lock(volumeMutex_);
     volumeState_.clear();
     for (const auto &desc : descs) {
         RESSCHED_LOGI("device change, type: %{public}d", desc->deviceType_);

@@ -454,6 +454,11 @@ ErrCode ResSchedService::RegisterSystemloadNotifier(const sptr<IRemoteObject>& n
 
 ErrCode ResSchedService::UnRegisterSystemloadNotifier()
 {
+    int32_t checkResult = RemoteRequestCheck();
+    if (checkResult != ERR_OK) {
+        RESSCHED_LOGE("check remote request fail. errorcode: %{public}d", checkResult);
+        return checkResult;
+    }
     NotifierMgr::GetInstance().UnRegisterNotifier(IPCSkeleton::GetCallingPid());
     return ERR_OK;
 }
@@ -473,6 +478,11 @@ ErrCode ResSchedService::RegisterEventListener(const sptr<IRemoteObject>& eventL
 
 ErrCode ResSchedService::UnRegisterEventListener(uint32_t eventType, uint32_t listenerGroup)
 {
+    int32_t checkResult = RemoteRequestCheck();
+    if (checkResult != ERR_OK) {
+        RESSCHED_LOGE("check remote request fail. errorcode: %{public}d", checkResult);
+        return checkResult;
+    }
     EventListenerMgr::GetInstance().UnRegisterEventListener(IPCSkeleton::GetCallingPid(), eventType, listenerGroup);
     return ERR_OK;
 }
