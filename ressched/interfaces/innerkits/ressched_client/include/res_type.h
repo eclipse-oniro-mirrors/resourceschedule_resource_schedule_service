@@ -475,6 +475,8 @@ enum : uint32_t {
     RES_TYPE_EXTENSION_START_PERF = 229,
     // report intelligent task sched
     RES_TYPE_INTELLIGENT_TASK_SCHED = 230,
+    // report background loader task status change
+    RES_TYPE_BACKGROUND_LOADER_TASK_STATUS_CHANGE = 231,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType

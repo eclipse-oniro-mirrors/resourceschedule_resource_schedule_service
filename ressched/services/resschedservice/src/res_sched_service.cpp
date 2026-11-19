@@ -232,6 +232,7 @@ namespace {
         { ResType::SYNC_RES_TYPE_NOTIFY_MAKE_IMAGE, { 3820 } },
         { ResType::SYNC_RES_TYPE_DFX_CTRL_IMAGE_INTERFACE, { 3063 } },
         { ResType::RES_TYPE_CAMERA_TORCH_STATE_CHANGE, { 1047 } },
+        { ResType::RES_TYPE_BACKGROUND_LOADER_TASK_STATUS_CHANGE, { 1096 } },
     };
     enum SYSTEM_LOAD_LEVEL_DEBUG_DUMP_SIGNAL : int32_t {
         DEBUG_LEVEL_MINIMUM = 0,
