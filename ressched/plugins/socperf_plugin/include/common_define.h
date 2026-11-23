@@ -18,6 +18,7 @@
 
 #include <string>
 #include <unordered_set>
+#include "parameters.h"
 
 namespace OHOS {
 namespace ResourceSchedule {
@@ -94,6 +95,7 @@ namespace {
     const int32_t PERF_REQUEST_CMD_ID_LOAD_PAGE_START       = 10007;
     const int32_t PERF_REQUEST_CMD_ID_EVENT_FLING           = 10008;
     const int32_t PERF_REQUEST_CMD_ID_EVENT_TOUCH_DOWN      = 10010;
+    const int32_t PERF_REQUEST_CMD_ID_ANCO_TOUCH_DOWN       = 1006;
     const int32_t PERF_REQUEST_CMD_ID_LOAD_PAGE_COMPLETE    = 10011;
     const int32_t PERF_REQUEST_CMD_ID_EVENT_WEB_GESTURE     = 10012;
     const int32_t PERF_REQUEST_CMD_ID_POP_PAGE              = 10016;
@@ -108,6 +110,7 @@ namespace {
     const int32_t PERF_REQUEST_CMD_ID_DRAG_STATUS_BAR       = 10034;
     const int32_t PERF_REQUEST_CMD_ID_GAME_START            = 10036;
     const int32_t PERF_REQUEST_CMD_ID_EVENT_TOUCH_UP        = 10040;
+    const int32_t PERF_REQUEST_CMD_ID_ANCO_TOUCH_UP         = 1007;
     const int32_t PERF_REQUEST_CMD_ID_REMOTE_UNLOCK         = 10041;
     const int32_t PERF_REQUEST_CMD_ID_ACCOUNT_ACTIVATING    = 10043;
     const int32_t PERF_REQUEST_CMD_ID_EVENT_KEY_DOWN        = 10044;
@@ -145,6 +148,8 @@ namespace {
     // PREMAKE_MODE_STRING = 1, PRELOADMODULE_MODE_STRING = 2,
     // PRELAUNCH_MODE_STRING = 4
     const std::unordered_set<std::string> PRELOAD_SET = {"1", "2", "4"};
+    static const std::string CCM_IS_OVERSEA = "const.cust.is_oversea";
+    static const bool IS_OVERSEA_PRODUCT = OHOS::system::GetBoolParameter(CCM_IS_OVERSEA, false);
 }
 
 } // namespace ResourceSchedule
