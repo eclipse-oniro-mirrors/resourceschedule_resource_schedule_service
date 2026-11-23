@@ -746,17 +746,17 @@ void SocPerfPlugin::HandleEventClick(const std::shared_ptr<ResData>& data)
     // touch down event
     if (data->value == ClickEventType::TOUCH_EVENT_DOWN_MMI) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_DOWN, "");
-        if (IS_OVERSEA_PRODUCT && isAncoForeground_) {
+        if (isAncoForeground_) {
             OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_DOWN, "");
         }
     } else if (data->value == ClickEventType::TOUCH_EVENT_DOWN) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_DOWN, "");
-        if (IS_OVERSEA_PRODUCT && isAncoForeground_) {
+        if (isAncoForeground_) {
             OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_DOWN, "");
         }
     } else if (data->value == ClickEventType::TOUCH_EVENT_UP) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_UP, "");
-        if (IS_OVERSEA_PRODUCT && isAncoForeground_) {
+        if (isAncoForeground_) {
             OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_UP, "");
         }
         HandleMoveEventBoost(data, false);
