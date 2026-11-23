@@ -148,8 +148,6 @@ namespace {
     // PREMAKE_MODE_STRING = 1, PRELOADMODULE_MODE_STRING = 2,
     // PRELAUNCH_MODE_STRING = 4
     const std::unordered_set<std::string> PRELOAD_SET = {"1", "2", "4"};
-    static const std::string CCM_IS_OVERSEA = "const.cust.is_oversea";
-    static const bool IS_OVERSEA_PRODUCT = OHOS::system::GetBoolParameter(CCM_IS_OVERSEA, false);
 }
 
 } // namespace ResourceSchedule
