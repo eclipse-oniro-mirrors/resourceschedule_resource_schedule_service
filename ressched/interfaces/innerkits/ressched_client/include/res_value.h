@@ -1127,6 +1127,14 @@ enum TorchState : int64_t {
     TORCH_OFF = 0,
     TORCH_ON = 1,
 };
+
+/**
+* @brief anco foreground state, value of RES_TYPE_ANCO_FOREGROUND_STATE
+*/
+enum AncoForegroundState : int64_t {
+    ANCO_APPS_ALL_BACKGROUND = 0,
+    ANCO_APP_IN_FOREGROUND = 1,
+};
 } // namespace ResType
 } // namespace ResourceSchedule
 } // namespace OHOS

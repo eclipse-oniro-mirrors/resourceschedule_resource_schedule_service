@@ -428,6 +428,8 @@ void SocPerfPlugin::AddOtherEventToFunctionMap()
         [this](const std::shared_ptr<ResData>& data) { HandleResTypeCreateLivingApp(data); }));
     functionMap.insert(std::make_pair(RES_TYPE_SOCPERF_PERFORMANCE_MODE_CHANGED,
         [this](const std::shared_ptr<ResData>& data) { HandlePerformanceModeChange(data); }));
+    functionMap.insert(std::make_pair(RES_TYPE_ANCO_FOREGROUND_STATE,
+        [this](const std::shared_ptr<ResData>& data) { HandleAncoForegroundStateChange(data); }));
     socperfGameBoostSwitch_ = InitFeatureSwitch(SUB_ITEM_KEY_NAME_SOCPERF_GAME_BOOST);
 }
 
@@ -435,6 +437,7 @@ void SocPerfPlugin::InitResTypes()
 {
     resTypes = {
         RES_TYPE_KEY_EVENT,
+        RES_TYPE_ANCO_FOREGROUND_STATE,
         RES_TYPE_WEB_GESTURE,
         RES_TYPE_POP_PAGE,
         RES_TYPE_APP_ABILITY_START,
@@ -743,14 +746,29 @@ void SocPerfPlugin::HandleEventClick(const std::shared_ptr<ResData>& data)
     // touch down event
     if (data->value == ClickEventType::TOUCH_EVENT_DOWN_MMI) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_DOWN, "");
+        if (isAncoForeground_) {
+            OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_DOWN, "");
+        }
     } else if (data->value == ClickEventType::TOUCH_EVENT_DOWN) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_DOWN, "");
+        if (isAncoForeground_) {
+            OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_DOWN, "");
+        }
     } else if (data->value == ClickEventType::TOUCH_EVENT_UP) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_TOUCH_UP, "");
+        if (isAncoForeground_) {
+            OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_ANCO_TOUCH_UP, "");
+        }
         HandleMoveEventBoost(data, false);
     } else if (data->value == ClickEventType::CLICK_EVENT) {
         OHOS::SOCPERF::SocPerfClient::GetInstance().PerfRequest(PERF_REQUEST_CMD_ID_EVENT_CLICK, "");
     }
+}
+
+void SocPerfPlugin::HandleAncoForegroundStateChange(const std::shared_ptr<ResData>& data)
+{
+    isAncoForeground_ = (data->value == ANCO_APP_IN_FOREGROUND);
+    SOC_PERF_LOGD("SocPerfPlugin: foreground state change: %{public}lld", (long long)data->value);
 }
 
 bool SocPerfPlugin::HandleMoveEventBoost(const std::shared_ptr<ResData>& data, bool isSet)

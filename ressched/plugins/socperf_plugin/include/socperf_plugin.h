@@ -140,6 +140,7 @@ private:
     std::optional<bool> thermalLimit_;
     bool socperfGameBoostSwitch_ = false;
     bool custGameState_ = false;
+    bool isAncoForeground_ = false;
     bool flingExceptionFlag_ = false;
     ffrt::task_handle wakeUpTimeOutTask_ = nullptr;
 
@@ -166,6 +167,7 @@ private:
     void InitPerfCrucialFunc(const char* perfSoPath, const char* perfSoFunc);
     void HandleWindowFocus(const std::shared_ptr<ResData>& data);
     void HandleEventClick(const std::shared_ptr<ResData>& data);
+    void HandleAncoForegroundStateChange(const std::shared_ptr<ResData>& data);
     void HandleEventKey(const std::shared_ptr<ResData>& data);
 #ifdef RESSCHED_RESOURCESCHEDULE_CROWN_POWER_KEY_ENABLE
     void HandlePowerEventKey(const std::shared_ptr<ResData>& data);
