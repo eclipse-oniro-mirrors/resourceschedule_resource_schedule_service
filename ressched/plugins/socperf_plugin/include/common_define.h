@@ -18,7 +18,6 @@
 
 #include <string>
 #include <unordered_set>
-#include "parameters.h"
 
 namespace OHOS {
 namespace ResourceSchedule {
