@@ -361,8 +361,6 @@ void SocPerfPlugin::AddEventToFunctionMap()
         [this](const std::shared_ptr<ResData>& data) { HandleCameraStateChange(data); }));
     functionMap.insert(std::make_pair(RES_TYPE_REPORT_GAME_STATE_CHANGE,
         [this](const std::shared_ptr<ResData>& data) { HandleGameStateChange(data); }));
-    functionMap.insert(std::make_pair(RES_TYPE_ANCO_FOREGROUND_STATE,
-        [this](const std::shared_ptr<ResData>& data) { HandleAncoForegroundStateChange(data); }));
     if (RES_TYPE_SCENE_BOARD_ID != 0) {
         functionMap.insert(std::make_pair(RES_TYPE_SCENE_BOARD_ID,
             [this](const std::shared_ptr<ResData>& data) { HandleSocperfSceneBoard(data); }));
@@ -430,6 +428,8 @@ void SocPerfPlugin::AddOtherEventToFunctionMap()
         [this](const std::shared_ptr<ResData>& data) { HandleResTypeCreateLivingApp(data); }));
     functionMap.insert(std::make_pair(RES_TYPE_SOCPERF_PERFORMANCE_MODE_CHANGED,
         [this](const std::shared_ptr<ResData>& data) { HandlePerformanceModeChange(data); }));
+    functionMap.insert(std::make_pair(RES_TYPE_ANCO_FOREGROUND_STATE,
+        [this](const std::shared_ptr<ResData>& data) { HandleAncoForegroundStateChange(data); }));
     socperfGameBoostSwitch_ = InitFeatureSwitch(SUB_ITEM_KEY_NAME_SOCPERF_GAME_BOOST);
 }
 
