@@ -277,8 +277,6 @@ void SocPerfPlugin::InitFunctionMap()
             [this](const std::shared_ptr<ResData>& data) { HandleWindowFocus(data); } },
         { RES_TYPE_CLICK_RECOGNIZE,
             [this](const std::shared_ptr<ResData>& data) { HandleEventClick(data); } },
-        { RES_TYPE_ANCO_FOREGROUND_STATE,
-            [this](const std::shared_ptr<ResData>& data) { HandleAncoForegroundStateChange(data); } },
         { RES_TYPE_LOAD_PAGE,
             [this](const std::shared_ptr<ResData>& data) { HandleLoadPage(data); } },
         { RES_TYPE_SLIDE_RECOGNIZE,
@@ -363,6 +361,8 @@ void SocPerfPlugin::AddEventToFunctionMap()
         [this](const std::shared_ptr<ResData>& data) { HandleCameraStateChange(data); }));
     functionMap.insert(std::make_pair(RES_TYPE_REPORT_GAME_STATE_CHANGE,
         [this](const std::shared_ptr<ResData>& data) { HandleGameStateChange(data); }));
+    functionMap.insert(std::make_pair(RES_TYPE_ANCO_FOREGROUND_STATE,
+        [this](const std::shared_ptr<ResData>& data) { HandleAncoForegroundStateChange(data); }));
     if (RES_TYPE_SCENE_BOARD_ID != 0) {
         functionMap.insert(std::make_pair(RES_TYPE_SCENE_BOARD_ID,
             [this](const std::shared_ptr<ResData>& data) { HandleSocperfSceneBoard(data); }));
