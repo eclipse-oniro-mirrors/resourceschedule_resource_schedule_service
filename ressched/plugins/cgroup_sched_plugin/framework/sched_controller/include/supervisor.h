@@ -120,6 +120,7 @@ public:
     SchedPolicy lastSchedGroup_ = SP_UPPER_LIMIT;
     SchedPolicy curSchedGroup_ = SP_UPPER_LIMIT;
     SchedPolicy setSchedGroup_ = SP_UPPER_LIMIT;
+    SchedPolicy coverSchedGroup_ = SP_UPPER_LIMIT;
     SchedPolicy specialSchedGroup_ = SP_UPPER_LIMIT;
     uint32_t policyDescription_ = 0;
 
