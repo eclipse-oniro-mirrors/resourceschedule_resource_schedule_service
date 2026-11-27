@@ -130,6 +130,7 @@ namespace {
         ResType::RES_TYPE_COMPONENT_STATE_CHANGE,
         ResType::RES_TYPE_DIALOG_SHOW_EVENT,
         ResType::RES_TYPE_LV_INTO_INIM,
+        ResType::RES_TYPE_NWEB_CREATE,
     };
     static const std::unordered_set<uint32_t> FG_THIRDPART_RES = {
         ResType::RES_TYPE_CLICK_RECOGNIZE,
@@ -143,6 +144,7 @@ namespace {
         ResType::RES_TYPE_AXIS_EVENT,
         ResType::RES_TYPE_WEB_SLIDE_SCROLL,
         ResType::RES_TYPE_OVERLAY_EVENT,
+        ResType::RES_TYPE_NWEB_CREATE,
     };
     static const std::unordered_set<uint32_t> SA_RES = {
         ResType::SYNC_RES_TYPE_THAW_ONE_APP,
