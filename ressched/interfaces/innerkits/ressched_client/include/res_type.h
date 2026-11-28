@@ -480,7 +480,7 @@ enum : uint32_t {
     // report anco foreground state, value 1: anco app in foreground, value 0: all anco apps in background
     RES_TYPE_ANCO_FOREGROUND_STATE = 232,
     // nweb create event for exact_preread
-    RES_TYPE_NWEB_CREATE = 233,
+    RES_TYPE_NWEB_CREATE = 235,
     // last async resType
     ASYNC_RES_TYPE_LAST,
     // first sync resType
