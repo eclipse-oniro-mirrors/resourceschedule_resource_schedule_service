@@ -286,6 +286,14 @@ enum PushPageType : int64_t {
 };
 
 /**
+* @brief CreateNweb value
+*/
+enum NWebCreateType : int64_t {
+    NWEB_CREATE_START = 0,
+    NWEB_CREATE_COMPLETE = 1,
+};
+
+/**
 * @brief App Start type
 */
 enum AppStartType : int64_t {
