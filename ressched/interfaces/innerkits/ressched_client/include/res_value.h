@@ -95,6 +95,11 @@ enum EventListenerGroup : uint32_t {
 enum ContinuousTaskState : uint32_t {
     AUDIO_RESUME = 0,
     AUDIO_DETECT_FAIL,
+    STRONG_PERCEPTION,
+    SYSTEM_SECONDARY_PERCEPTION,
+    THIRD_SECONDARY_PERCEPTION,
+    WEAK_PERCEPTION,
+    NO_PERCEPTION,
 };
 
 enum GcState : uint32_t {
@@ -1142,6 +1147,24 @@ enum TorchState : int64_t {
 enum AncoForegroundState : int64_t {
     ANCO_APPS_ALL_BACKGROUND = 0,
     ANCO_APP_IN_FOREGROUND = 1,
+};
+
+/**
+ * @brief continuous task notification type; used as reportdata value, detail type is in payload
+ */
+enum ContinuousNotificationState : int64_t {
+    CONTINUOUS_TASK_NOTIFICATION_TYPE = 0,
+};
+
+/**
+ * @brief res value for RES_TYPE_TASK_DETECTION_RESULT
+*/
+enum TaskDetectionResultType : int64_t {
+    DETECT_RESULT_REPORT,
+    BT_DATA_TRANSFER_CHANGE,
+    NL_DATA_TRANSFER_CHANGE,
+    SCREEN_RESULT_REPORT,
+    PERCEPTION_RESULT_REPORT,
 };
 } // namespace ResType
 } // namespace ResourceSchedule
